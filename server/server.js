@@ -7,6 +7,7 @@ const moment = require('moment-timezone');
 const db = require('../database/index.js');
 const favicon = require('express-favicon');
 const socket = require('socket.io');
+const path = require('path');
 const router = require('./routes.js');
 
 const passport = require('passport');
@@ -25,7 +26,7 @@ const io = socket(server);
 passport.use(new FacebookStrategy({
   clientID: '142468679794360',
   clientSecret: 'dc9b545b3bf20babe315f1757594edf0',
-  callbackURL: "http://localhost:3000/auth/facebook/callback"
+  callbackURL: "http://localhost:3008/auth/facebook/callback"
 },
 function(accessToken, refreshToken, profile, cb) {
   User.findOrCreate({ facebookId: profile.id }, function (err, user) {
@@ -49,7 +50,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 app.use(favicon(__dirname + '/../client/dist/img/favicon.ico'));
 
-app.use(express.static(__dirname + '../../client/dist'));
+app.use(express.static(path.join(__dirname, '../client/dist')));
 
 var allowCrossDomain = function(req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
