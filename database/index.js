@@ -1,7 +1,7 @@
 const { Pool, Client } = require('pg');
 require('dotenv').config();
 
-// FOR HEROKU DEPLOYMENT
+// // FOR HEROKU DEPLOYMENT
 // const pool = new Pool({
 //   user: process.env.USER,
 //   host: process.env.HOST,
@@ -20,7 +20,7 @@ const pool = new Pool({
   port: 5432,
   ssl: false,
 });
-//
+
 pool.query('SELECT NOW()', (err, res) => {
   if (err) {
     console.log('Pool Connection Error', err);
@@ -28,7 +28,7 @@ pool.query('SELECT NOW()', (err, res) => {
   console.log('Pool Connected');
 });
 
-// FOR HEROKU DEPLOYMENT
+// // FOR HEROKU DEPLOYMENT
 // const client = new Client({
 //   user: process.env.USER,
 //   host: process.env.HOST,
@@ -43,7 +43,7 @@ const client = new Client({
   user: 'postgres',
   host: 'localhost',
   database: 'coinspace',
-  password: '',
+  password: 'password',
   port: 5432,
   ssl: false,
 });

@@ -9,6 +9,7 @@ const favicon = require('express-favicon');
 const socket = require('socket.io');
 const path = require('path');
 const router = require('./routes.js');
+const path = require('path');
 
 const passport = require('passport');
 const FacebookStrategy = require('passport-facebook').Strategy;
@@ -48,7 +49,7 @@ app.get('/auth/facebook/callback',
 //rest of the app
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
-app.use(favicon(__dirname + '/../client/dist/img/favicon.ico'));
+app.use(favicon(path.join(__dirname, '../client/dist/img/favicon.ico')));
 
 app.use(express.static(path.join(__dirname, '../client/dist')));
 
