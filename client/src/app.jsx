@@ -9,6 +9,7 @@ import Chat from './components/Chat.jsx';
 import Login from './components/Login.jsx';
 import FBLogin from './components/FacebookLogin.jsx';
 import moment from 'moment';
+import TradingPage from './components/TradingPage.jsx';
 import PortfolioPage from './components/PortfolioPage.jsx';
 import Modal from 'react-responsive-modal';
 import { Header, Input, Menu, Segment, Container, Divider, Grid, Sticky, Button, Icon, Image, Statistic } from 'semantic-ui-react';
@@ -48,7 +49,7 @@ class App extends React.Component {
       chatOpen: false,
       currentUser: '',
     };
-    this.socket = io('https://coinspace.herokuapp.com');
+    this.socket = io('http://localhost:3000');
     this.changePage = this.changePage.bind(this);
     this.addData = this.addData.bind(this);
     this.getChartData = this.getChartData.bind(this);
@@ -150,6 +151,40 @@ class App extends React.Component {
       return <div/>;
     }
 
+    var displayDiv = null;
+    if (this.state.renderedPage === 'Charts') {
+            displayDiv = 
+            <div className="ui grid">
+               <div className="three column row"></div>
+               <div className="sixteen column row">
+                 <div className="one wide column"></div>
+                 {coins.map((coin, index) =>
+                  <SmallCurrencyToggle key={index} name={coin[0]} currentCoin={this.state.currentCoin} currentTimePeriod={this.state.currentTimePeriod} coin={this.state.latestPrices[index]} onSetCoin={this.getChartData.bind(this)} />
+                )}
+                <Menu pointing secondary>
+                  <Menu.Item active={this.state.chatOpen} name='chat' onClick={this.onChatOpen.bind(this)}><Icon name='comments' size='big'/></Menu.Item>
+                </Menu>
+                {this.state.chatOpen ? <Chat socket={this.socket} chatOpen={this.state.chatOpen} onChatClose={this.onChatClose.bind(this)} currentUser={this.state.currentUser}/> : null}
+                <div className="four wide column"></div>
+                {Object.keys(labels).map((label, index) =>
+                  <TimeIntervalToggle key={index} label={label} currentCoin={this.state.currentCoin} currentTimePeriod={this.state.currentTimePeriod} onSetTimePeriod={this.getChartData.bind(this)}/>
+                )}
+
+                <div className='column'></div>
+              </div>
+              <TriComponentRow coins={coins} labels={labels} state={this.state}/>
+              <CoinChart state={this.state} />
+            </div>
+            
+          } 
+          else if (this.state.renderedPage === 'Portfolio') {
+            displayDiv = <PortfolioPage state={this.state}/>
+          }
+
+          else if (this.state.renderedPage === 'Markets') {
+            displayDiv = <TradingPage state={this.state}/>
+          }
+
     return (
       <div id="mainWrapper" className="mainBackground">
         <Grid width={16}><Grid.Row style={{"height": 73}}><Grid.Column color='blue'>
@@ -159,6 +194,7 @@ class App extends React.Component {
             coin <b><font color="black">re</font></b>base
           </Header>
             <Menu.Menu position='right'>
+              <Menu.Item name='Markets' active={renderedPage === 'Markets'} onClick={this.changePage}><Icon name='line chart'/>Markets</Menu.Item>
               <Menu.Item name='Charts' active={renderedPage === 'Charts'} onClick={this.changePage}><Icon name='line chart'/>Charts</Menu.Item>
               {this.state.userLogin ? null : <Menu.Item name='Login' active={this.state.openLogin} onClick={this.openLoginModal.bind(this)}><Icon name='key'/>Login</Menu.Item>}
               {this.state.openLogin ? <Login userLogin={this.userLogin.bind(this)} userLogout={this.userLogout.bind(this)} openLogin={this.state.openLogin} closeLoginModal={this.closeLoginModal.bind(this)}/> : null}
@@ -168,30 +204,7 @@ class App extends React.Component {
           </Menu>
           </Grid.Column></Grid.Row></Grid>
 
-        {this.state.renderedPage === 'Charts' ? (
-          <div className="ui grid">
-            <div className="three column row"></div>
-            <div className="sixteen column row">
-              <div className="one wide column"></div>
-              {coins.map((coin, index) =>
-                <SmallCurrencyToggle key={index} name={coin[0]} currentCoin={this.state.currentCoin} currentTimePeriod={this.state.currentTimePeriod} coin={this.state.latestPrices[index]} onSetCoin={this.getChartData.bind(this)} />
-              )}
-              <Menu pointing secondary>
-                <Menu.Item active={this.state.chatOpen} name='chat' onClick={this.onChatOpen.bind(this)}><Icon name='comments' size='big'/></Menu.Item>
-              </Menu>
-              {this.state.chatOpen ? <Chat socket={this.socket} chatOpen={this.state.chatOpen} onChatClose={this.onChatClose.bind(this)} currentUser={this.state.currentUser}/> : null}
-              <div className="four wide column"></div>
-              {Object.keys(labels).map((label, index) =>
-                <TimeIntervalToggle key={index} label={label} currentCoin={this.state.currentCoin} currentTimePeriod={this.state.currentTimePeriod} onSetTimePeriod={this.getChartData.bind(this)}/>
-              )}
-
-              <div className='column'></div>
-            </div>
-            <TriComponentRow coins={coins} labels={labels} state={this.state}/>
-            <CoinChart state={this.state} />
-          </div>
-        ) : (<PortfolioPage state={this.state}/>)
-        }
+        {displayDiv}
       </div>
     );
   }
