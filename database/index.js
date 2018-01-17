@@ -196,7 +196,6 @@ module.exports = {
   getBalancesOfUser,
   findUser,
   getUserData,
-  findExistingUser,
   getBuyOrders,
   getSellOrders
 };
