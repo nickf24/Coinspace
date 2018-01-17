@@ -23,7 +23,7 @@ client.connect();
 
 client.query(` CREATE TABLE IF NOT EXISTS users (
   id serial NOT NULL PRIMARY KEY,
-  email varchar(50) NOT NULL,
+  username varchar(50) NOT NULL,
   password text NOT NULL,
   btc_balance NUMERIC,
   eth_balance NUMERIC,

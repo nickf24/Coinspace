@@ -48,6 +48,7 @@ class App extends React.Component {
       userLogin: false,
       chatOpen: false,
       currentUser: '',
+      loggedInUser: {}
     };
     this.socket = io('http://localhost:3000');
     this.changePage = this.changePage.bind(this);
@@ -56,6 +57,14 @@ class App extends React.Component {
     this.socket.on('new data', (results) =>{
       this.addData(results);
     });
+  }
+
+  componentWillMount() {
+    var app = this;
+    axios.get('/sign/auth')
+      .then(response => {
+        app.setState({userLogin: response.data.authRes});
+      })
   }
 
   componentDidMount() {
@@ -115,20 +124,24 @@ class App extends React.Component {
     });
   }
 
-  userLogin(userName) {
+  userLogin(userData) {
     this.setState({
       userLogin: true,
       openLogin: false,
-      currentUser: userName
+      loggedInUser: userData
     });
   }
 
   userLogout() {
-    this.setState({
-      userLogin: false,
-      renderedPage: 'Charts',
-      currentUser: ''
-    });
+    var app = this;
+    axios.get('/sign/out')
+      .then(response => {
+        app.setState({
+          userLogin: false,
+          renderedPage: 'Charts',
+          loggedInUser: {}
+        });
+      })
   }
 
   onChatOpen() {
