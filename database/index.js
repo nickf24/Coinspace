@@ -77,7 +77,7 @@ var getData = () => {
 var insertNewUser = (username, hashedPassword) => {
   return new Promise(function(resolve, reject) {
     client.query(
-      `insert into users (email, password) values ('${username}', '${hashedPassword}')`, (err, res) => {
+      `insert into users (email, password, usd_balance) values ('${username}', '${hashedPassword}', 100000)`, (err, res) => {
         if (err) {
           return reject(err);
         }
@@ -98,10 +98,22 @@ var findExistingUser = () => {
   });
 };
 
+var getBalancesOfUser = function(email, callback) {
+  let queryStr = `SELECT (btc_balance, eth_balance, xrp_balance, usd_balance) FROM users WHERE email = '${email}'`;
+  client.query(queryStr, (err, res) => {
+    if (err) {
+      callback(err, null);
+    } else {
+      callback(null, res)
+    }
+  })
+}
+
 module.exports = {
   client,
   pool,
   getData,
   insertNewUser,
-  findExistingUser
+  findExistingUser,
+  getBalancesOfUser
 };
