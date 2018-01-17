@@ -96,6 +96,12 @@
   left: 28.5%;
 }
 
+#dashCard3 {
+  width: 530px;
+  height: 417px;
+  
+}
+
 #nextButton {
   margin-bottom: 0px;
   bottom: 3px;
