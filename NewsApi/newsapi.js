@@ -1,5 +1,4 @@
 var axios = require('axios');
-let NEWS_API_KEY = 'bc94c1e9a8bf4049a98d573c1aa7c84b'
 require('dotenv').config();
 
 /* https://newsapi.org/s/crypto-coins-news-api */

@@ -1,4 +1,5 @@
 const express = require('express');
+const app = express();
 const bodyParser = require('body-parser');
 const cryptoAPI = require('../BitFinexAPI/BitFinexAPI.js');
 const newsAPI = require('../NewsApi/newsapi.js');
@@ -9,32 +10,69 @@ const favicon = require('express-favicon');
 const socket = require('socket.io');
 const path = require('path');
 const router = require('./routes.js');
-const path = require('path');
+const expressValidator = require('express-validator');
 
+//// PASSPORT LIBRARIES ////
 const passport = require('passport');
-const FacebookStrategy = require('passport-facebook').Strategy;
+const LocalStrategy = require('passport-local').Strategy;
+const session = require('express-session');
+const pgSession = require('connect-pg-simple')(session);
+const authentication = require('./authentication.js');
+//// PASSPORT CONFIGURATION ////
+app.use(session({
+  secret: 'coinface',
+  resave: false,
+  saveUninitialized: false,
+  store: new pgSession({
+    pool: db.pool
+  })
+}));
+app.use(passport.initialize());
+app.use(passport.session());
 
-const app = express();
+passport.use(new LocalStrategy((username, password, done) => {
+  db.findUser(username, (error, result) => {
+    if (error) {
+      done(error);
+    } else {
+      if (result.rows.length === 0) {
+        done(null, false);
+      } else {
+        authentication.verifyPassword(password, result.rows[0].password, (error, pwCheck) => {
+          if (error) {
+            console.error(error);
+          } else {
+            if (pwCheck === true) {
+              return done(null, result.rows[0].id)
+            } else {
+              return done(null, false);
+            }
+          }
+        })
+      }
+    }
+  })
+}))
+
+//// Server Initialization ////
 const port = process.env.PORT || 3000;
-
 const server = app.listen(port, () => {
   console.log(`server, listening on port ${port}`);
 });
-
 const io = socket(server);
 
 //passport + facebook
-passport.use(new FacebookStrategy({
-  clientID: '142468679794360',
-  clientSecret: 'dc9b545b3bf20babe315f1757594edf0',
-  callbackURL: "http://localhost:3008/auth/facebook/callback"
-},
-function(accessToken, refreshToken, profile, cb) {
-  User.findOrCreate({ facebookId: profile.id }, function (err, user) {
-    return cb(err, user);
-  });
-}
-));
+// passport.use(new FacebookStrategy({
+//   clientID: '142468679794360',
+//   clientSecret: 'dc9b545b3bf20babe315f1757594edf0',
+//   callbackURL: "http://localhost:3008/auth/facebook/callback"
+// },
+// function(accessToken, refreshToken, profile, cb) {
+//   User.findOrCreate({ facebookId: profile.id }, function (err, user) {
+//     return cb(err, user);
+//   });
+// }
+// ));
 
 app.get('/auth/facebook',
   passport.authenticate('facebook'));
@@ -49,6 +87,7 @@ app.get('/auth/facebook/callback',
 //rest of the app
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
+app.use(expressValidator());
 app.use(favicon(path.join(__dirname, '../client/dist/img/favicon.ico')));
 
 app.use(express.static(path.join(__dirname, '../client/dist')));
@@ -144,6 +183,14 @@ app.get('/balance', (req, res) => {
 //     });
 // });
 
+//// USER SERIALIZATION PROCESS ////
+passport.serializeUser(function(userid, done) {
+  done(null, userid);
+});
+
+passport.deserializeUser(function(userid, done) {
+  done(null, userid);
+});
 
 io.on('connection', socket => {
   io.emit('new message', 'A new user joined the chat');
