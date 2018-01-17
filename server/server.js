@@ -120,6 +120,19 @@ app.get('/news', (req, res) => {
     });
 });
 
+app.get('/balance', (req, res) => {
+  console.log(req);
+  console.log('EMAIL IS', req.body.email);
+  db.getBalancesOfUser(req.body.email, (err, results) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log('RESULTS ARE', results);
+      // res.send('hello world');
+      res.send(results);
+    }
+  })
+})
 // app.get('/init', (req, res) => {
 //   // load historical data into client
 //   Promise.all([db.getYearData(), db.getMonthData(), db.getWeeklyData()])

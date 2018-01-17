@@ -24,7 +24,11 @@ client.connect();
 client.query(` CREATE TABLE IF NOT EXISTS users (
   id serial NOT NULL PRIMARY KEY,
   email varchar(50) NOT NULL,
-  password text NOT NULL
+  password text NOT NULL,
+  btc_balance NUMERIC,
+  eth_balance NUMERIC,
+  xrp_balance NUMERIC,
+  usd_balance NUMERIC
   )`);
 
 client.query(`CREATE TABLE IF NOT EXISTS coin (
@@ -32,6 +36,29 @@ client.query(`CREATE TABLE IF NOT EXISTS coin (
   name varchar(50) NOT NULL
 )`);
 
+client.query(`CREATE TABLE IF NOT EXISTS orders (
+
+  id SERIAL NOT NULL PRIMARY KEY,
+  type TEXT,
+  executed BOOLEAN,
+  quantity NUMERIC,
+  price NUMERIC,
+  currency VARCHAR(200),
+  time_executed TIMESTAMP
+
+)`)
+
+let createSession = `
+CREATE TABLE IF NOT EXISTS "session" (
+  "sid" varchar NOT NULL COLLATE "default",
+  "sess" json NOT NULL,
+  "expire" timestamp(6) NOT NULL
+)
+WITH (OIDS=FALSE);
+ALTER TABLE "session" ADD CONSTRAINT "session_pkey" PRIMARY KEY ("sid") NOT DEFERRABLE INITIALLY IMMEDIATE;
+`
+
+client.query(createSession);
 const coins = ['Bitcoin', 'Ethereum', 'Litecoin', 'Ripple'];
 
 coins.forEach((coin, index) => {

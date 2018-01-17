@@ -37,6 +37,7 @@ router.get('/in', (req, res) => {
 });
 
 router.post('/in', (req, res) => {
+	// console.log('INSIDE LOGIN', req.body.email)
 	db.findExistingUser()
 	.then((data) => {
 		return data.filter((entry) => {
@@ -61,5 +62,18 @@ router.post('/in', (req, res) => {
     	console.log('There is an error in routes.js sign in', error);
 	})
 });
+
+// router.get('/balance', (req, res) => {
+//   console.log('NEW EMAIL IS', req.body.email);
+//   db.getBalancesOfUser(req.body.email, (err, results) => {
+// 	if (err) {
+// 	  console.log(err);
+// 	} else {
+// 	  console.log('RESULTS ARE', results);
+// 	  // res.send('hello world');
+// 	  res.send(results);
+// 	}
+//   })
+// })
 
 module.exports = router;

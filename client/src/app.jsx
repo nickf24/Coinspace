@@ -43,7 +43,7 @@ class App extends React.Component {
       chartDataSet:[],
       chartBGcolor:'',
       chartBorderColor: '',
-      renderedPage: 'Charts',
+      renderedPage: 'Markets',
       openLogin: false,
       userLogin: false,
       chatOpen: false,
