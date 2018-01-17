@@ -100,7 +100,7 @@ var allowCrossDomain = function(req, res, next) {
 };
 
 app.use(allowCrossDomain);
-
+//
 
 // Dillon Experimental Route for SignUp UserPassword
 app.use('/sign', router);
@@ -173,6 +173,28 @@ app.get('/balance', (req, res) => {
     }
   })
 })
+
+app.get('/buys', (req, res) => {
+  db.getBuyOrders((err, results) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(results);
+    }
+  })
+});
+
+
+app.get('/sells', (req, res) => {
+  db.getSellOrders((err, results) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(results);
+    }
+  })
+});
+
 // app.get('/init', (req, res) => {
 //   // load historical data into client
 //   Promise.all([db.getYearData(), db.getMonthData(), db.getWeeklyData()])

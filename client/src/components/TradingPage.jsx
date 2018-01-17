@@ -5,6 +5,7 @@ import CoinChartCard from './CoinChartCard.jsx';
 import BuyOrdersCard from './BuyOrdersCard.jsx';
 import SellOrdersCard from './SellOrdersCard.jsx';
 import PastTradesCard from './PastTradesCard.jsx';
+import MarketsCard from './MarketsCard.jsx';
 import TopCryptoNews from './TopCryptoNews.jsx';
 import ActivityFeed from './ActivityFeed.jsx';
 import { Header, Input, Menu, Segment, Container, Divider, Grid, Sticky, Button, Icon, Image, Statistic } from 'semantic-ui-react';
@@ -14,7 +15,7 @@ class TradingPage extends React.Component {
     super(props);
     this.state = {
       page: 'Markets',
-      coinAllocation: [100, 25, 35]
+      currentCoin: 'Bitcoin'
     };
 
     this.chartData = {
@@ -36,6 +37,7 @@ class TradingPage extends React.Component {
     }).catch((error) => {
       console.log('error on get', error);
     })
+
   }
 
 
@@ -43,13 +45,12 @@ class TradingPage extends React.Component {
     console.log(e.target);
   }
 
-  getCoinAllocation() {
-    var bitcoinQuantity = parseInt(document.getElementById('bitcoinInput').value);
-    var ethereumQuantity = parseInt(document.getElementById('ethereumInput').value);
-    var litecoinQuantity = parseInt(document.getElementById('litecoinInput').value);
+  handleExchangeBookClick(name) {
+    // alert('hey')
+    console.log('name is', name);
     this.setState({
-      coinAllocation: [bitcoinQuantity, ethereumQuantity, litecoinQuantity]
-    })
+      currentCoin: name
+    });
   }
 
   // changeLayout (e) {
@@ -60,20 +61,24 @@ class TradingPage extends React.Component {
 
   render() {
 
-
     return (
       <div className="ui segment pushable" id="portfolioPage">
 
         {/* ----- HTML Below Designates the Content Space (two cards wide) -----*/}
         <div className="pusher">
           <div className="ui segment">
-            <h2 className="header centered"> {this.state.page} </h2>
-            <div className="ui two stackable cards">
-              <CoinChartCard chartData={this.chartData} currentCoinData={this.props.state}/> 
-              <PastTradesCard />
-              <BuyOrdersCard />
-              <SellOrdersCard />
+            <h1 className="header centered"> {this.state.page} </h1>
+            <CoinChartCard chartData={this.chartData} currentCoinData={this.props.state}/> 
 
+            <div className="ui divider"></div> 
+            <div className="ui two stackable cards centered">
+              <MarketsCard clickFn = {this.handleExchangeBookClick.bind(this)} currentCoin = {this.state.currentCoin}/>
+              <PastTradesCard currentCoin = {this.state.currentCoin}/>
+            </div>
+            <div className="ui divider"></div> 
+            <div className="ui two stackable cards centered">
+              <BuyOrdersCard currentCoin = {this.state.currentCoin}/>
+              <SellOrdersCard currentCoin = {this.state.currentCoin}/>
               {/* -------------- The Content Space HTML Ends here -------------------------*/}
             </div>
           </div>
