@@ -25,9 +25,12 @@ class SellOrdersCard extends React.Component {
   render() {
     // this.props.orders.map((order, index) => <OrderBookRow order = {order} key = {index}/>)
     // should only show markets for this.props.currentCoin
+    var divStyle = {
+      'overflowY': "scroll"
+    }
   	return (
 
-  	 <div id="dashCard" className="ui blue raised card orderBook" name='Graph' onClick={this.props.changeLayout}> 
+  	 <div id="dashCard" className="ui blue raised card orderBook" name='Graph' onClick={this.props.changeLayout} style = {divStyle}> 
         <div className="content"> 
         <h3> Sell Orders </h3>
         <table className = "ui celled table">

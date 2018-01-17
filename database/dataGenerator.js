@@ -33,6 +33,8 @@ class Order {
 
 module.exports.Generator = function(array, coin, coinPrice) {
   for (var i = 0; i <= 1000; i++) {
+    var coins = ['ETH', 'BTC', 'XRP'];
+    var coin = coins[Math.floor(Math.random() * 3)];
   	var newOrder = new Order(coin, coinPrice);
   	array.push(newOrder);
   }

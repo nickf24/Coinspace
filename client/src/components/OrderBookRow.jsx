@@ -12,6 +12,7 @@ class OrderBookRow extends React.Component {
   	// if this.props.index === even 
   	// render row as class 'white'
   	// else
+    //
   	  // render row as class 'grey'
     let price = null;
     let quantity = null;
@@ -23,9 +24,6 @@ class OrderBookRow extends React.Component {
       value = <td> {Number(this.props.order.price) * Number(this.props.order.quantity)} </td>
     }
   	return (
-
-
-
 
   		<tr>
   			{price}

@@ -23,9 +23,12 @@ class BuyOrdersCard extends React.Component {
 
   render() {
   	// should only show markets for this.props.currentCoin
+    var divStyle = {
+      'overflowY': "scroll"
+    }
     return (
 
-     <div id="dashCard" className="ui blue raised card" name='Graph' onClick={this.props.changeLayout}> 
+     <div id="dashCard" className="ui blue raised card" name='Graph' onClick={this.props.changeLayout} style = {divStyle}> 
         <div className="content"> 
         <h3> Buy Orders </h3>
         <table className = "ui celled table">

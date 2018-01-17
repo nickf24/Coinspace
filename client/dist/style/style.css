@@ -124,11 +124,11 @@
   background-color: lightgrey;
 }
 
-tbody {
+/*tbody {
   overflow-y:scroll;
   height:225px;
   display:block;
-}
+}*/
 
 thead {
   overflow: none;

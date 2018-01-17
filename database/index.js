@@ -167,7 +167,7 @@ var getBalancesOfUser = function(email, callback) {
 }
 
 var getBuyOrders = function(callback) {
-  let queryStr = `SELECT * FROM orders WHERE type = 'BUY' ORDER BY PRICE DESC`;
+  let queryStr = `SELECT * FROM orders WHERE type = 'BUY' AND executed = 'false' ORDER BY PRICE DESC`;
   client.query(queryStr, (err, res) => {
     if (err) {
       callback(err, null);
@@ -178,7 +178,7 @@ var getBuyOrders = function(callback) {
 }
 
 var getSellOrders = function(callback) {
-  let queryStr = `SELECT * FROM orders WHERE type = 'SELL' ORDER BY PRICE`;
+  let queryStr = `SELECT * FROM orders WHERE type = 'SELL' AND executed = 'false' ORDER BY PRICE` ;
   client.query(queryStr, (err, res) => {
     if (err) {
       callback(err, null);

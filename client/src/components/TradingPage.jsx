@@ -5,6 +5,8 @@ import CoinChartCard from './CoinChartCard.jsx';
 import BuyOrdersCard from './BuyOrdersCard.jsx';
 import SellOrdersCard from './SellOrdersCard.jsx';
 import PastTradesCard from './PastTradesCard.jsx';
+import BuyCard from './BuyCard.jsx';
+import SellCard from './SellCard.jsx';
 import MarketsCard from './MarketsCard.jsx';
 import TopCryptoNews from './TopCryptoNews.jsx';
 import ActivityFeed from './ActivityFeed.jsx';
@@ -70,6 +72,11 @@ class TradingPage extends React.Component {
             <h1 className="header centered"> {this.state.page} </h1>
             <CoinChartCard chartData={this.chartData} currentCoinData={this.props.state}/> 
 
+            <div className="ui divider"></div> 
+            <div className="ui two stackable cards centered">
+              <BuyCard />
+              <SellCard />
+            </div>  
             <div className="ui divider"></div> 
             <div className="ui two stackable cards centered">
               <MarketsCard clickFn = {this.handleExchangeBookClick.bind(this)} currentCoin = {this.state.currentCoin}/>
