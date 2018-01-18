@@ -152,6 +152,12 @@ class TradingPage extends React.Component {
             // if buyer has enough usd_balance to cover price
             // PATCH order to be executed T at the time
             // PATCH user to update usd_balance and coin balance
+            axios.post('/orders', {orderId: firstOrder.id}).then((response) => {
+              console.log(response);
+            }).catch((error) => {
+              console.log(error);
+            })
+
             var newUsdBalance = instance.state.usdBalance - volume * price;
             var newCoinBalance = Number(volume);
             var currentCoin = instance.state.currentCoin;

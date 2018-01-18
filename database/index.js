@@ -212,6 +212,18 @@ let updateUserBalance = function(userId, coin, newCoinBalance, newUsdBalance, ca
   });
 }
 
+let updateOrders = function(orderId, callback) {
+  let queryStr = `UPDATE orders SET (executed, time_executed) = ('true', '${new Date().toString().split('GMT')[0]}') WHERE id = ${orderId}`;
+  console.log('QUERYSTR IS', queryStr);
+  client.query(queryStr, (err, res) => {
+    if (err) {
+      callback(err, null);
+    } else {
+      callback(null, res);
+    }
+  });
+}
+
 module.exports = {
   client,
   pool,
@@ -222,5 +234,6 @@ module.exports = {
   getUserData,
   getBuyOrders,
   getSellOrders,
-  updateUserBalance
+  updateUserBalance,
+  updateOrders
 };

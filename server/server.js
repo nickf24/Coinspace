@@ -221,16 +221,17 @@ app.post('/userBalance', (req, res) => {
       res.send(results);
     }
   })
+});
+
+app.post('/orders', (req, res) => {
+  db.updateOrders(req.body.orderId, (err, results) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(results);
+    }
+  })
 })
-// app.get('/init', (req, res) => {
-//   // load historical data into client
-//   Promise.all([db.getYearData(), db.getMonthData(), db.getWeeklyData()])
-//     .then(results => {
-//       res.json(results);
-//     }).catch(err => {
-//       console.log('init err', err);
-//     });
-// });
 
 //// USER SERIALIZATION PROCESS ////
 passport.serializeUser(function(userid, done) {
