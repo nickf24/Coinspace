@@ -35,60 +35,8 @@ class TradingPage extends React.Component {
   }
 
   componentDidMount() {
-    var instance = this;
-    var convertToNum = function(str) {
-      var output = []; 
-      for (var i = 0; i < str.length; i++) {
-        var char = str[i];
-        if (!isNaN(Number(char))) {
-          output.push(char);
-        }
-      }
-      return output.join('');
-    }
-
     this.load()
-    
-    // console.log('IN BUY ORDERS CARD', this.props.currentCoin);
-    var currentPair = this.state.currentCoin.split('/').join('');
-    axios.get(`/buys/${currentPair}`).then((response) => {
-      var buysResponse = response;
-        axios.get(`/sells/${currentPair}`).then((resp) => {
-          // console.log('BUYS ARE', response);
-          instance.setState({
-            sellOrders: resp.data.rows.slice(0, 50),
-            buyOrders: buysResponse.data.rows.slice(0, 50)
-          })
-        }).catch((error) => {
-          console.log(error);
-        })
-    }).catch((error) => {
-      console.log(error);
-    })
-    axios.get('/user').then((response) => {
-      var data = response.data.rows[0].row.split(',');
-      var btcBal = convertToNum(data[0]);
-      var ethBal = convertToNum(data[1]);
-      var xrpBal = convertToNum(data[2]);
-      var usdBal = convertToNum(data[3]);
-
-
-      instance.setState((prevState) => {
-        return {
-          usdBalance: usdBal,
-          ethBalance: ethBal,
-          xrpBalance: xrpBal,
-          btcBalance: btcBal
-        }
-      })
-
-
-    }).catch((error) => {
-      console.log('error on get', error);
-    })
-
   }
-
 
   changeLayout (e) {
     console.log(e.target);
@@ -127,9 +75,13 @@ class TradingPage extends React.Component {
     var instance = this;
     var convertToNum = function(str) {
       var output = []; 
+      console.log(str);
       for (var i = 0; i < str.length; i++) {
         var char = str[i];
-        if (!isNaN(Number(char))) {
+        if (char === '.') {
+          output.push(char);
+        } 
+        else if (!isNaN(Number(char))) {
           output.push(char);
         }
       }
@@ -138,16 +90,12 @@ class TradingPage extends React.Component {
  
 
     var currentCoin = instance.state.currentCoin;
-    // currentCoin = currentCoin.split('/')[0];
     var currentPair = currentCoin.split('/').join('');
-    console.log('currentpair is', currentPair)
 
     axios.get(`/buys/${currentPair}`).then((response) => {
       var buysResponse = response;
         axios.get(`/sells/${currentPair}`).then((response) => {
-          // console.log('BUYS ARE', response);
           instance.setState((prevState) => {
-            console.log('SETTING STATE TO', prevState.currentCoin)
             return {
               sellOrders: response.data.rows.slice(0, 50),
               buyOrders: buysResponse.data.rows.slice(0, 50),
@@ -162,10 +110,31 @@ class TradingPage extends React.Component {
     })
 
     axios.get('/completedOrders').then((response) => {
-      console.log('completed orders are', response.data.rows)
       instance.setState({
         pastTrades: response.data.rows
       })
+    })
+
+    axios.get('/user').then((response) => {
+      var data = response.data.rows[0].row.split(',');
+      var btcBal = convertToNum(data[0]);
+      var ethBal = convertToNum(data[1]);
+      var xrpBal = convertToNum(data[2]);
+      var usdBal = convertToNum(data[3]);
+
+      console.log('setting USD Balances to', usdBal)
+      instance.setState((prevState) => {
+        return {
+          usdBalance: usdBal,
+          ethBalance: ethBal,
+          xrpBalance: xrpBal,
+          btcBalance: btcBal
+        }
+      })
+
+
+    }).catch((error) => {
+      console.log('error on get', error);
     })
   }
 
@@ -188,7 +157,7 @@ class TradingPage extends React.Component {
         var firstOrder = sellOrders[0];
         console.log('first order is', firstOrder);
         if (Number(firstOrder.quantity) >= orderVol) {
-          if (instance.state.usdBalance > (orderVol * orderPrice)) {
+          if (usdBalance > (orderVol * orderPrice)) {
             if (orderPrice >= Number(firstOrder.price)) {
             // if buyer has enough usd_balance to cover price
             // PATCH order to be executed T at the time
@@ -209,8 +178,9 @@ class TradingPage extends React.Component {
                   console.log(error);
                 })
               } 
-
-              var newUsdBalance = Number(instance.state.usdBalance) - Number(orderVol) * Number(orderPrice);
+              console.log('old balances are', usdBalance);
+              var newUsdBalance = Number(usdBalance) - (Number(orderVol) * Number(orderPrice));
+              console.log('new balances are!!', newUsdBalance, orderVol, orderPrice)
               var newCoinBalance = Number(orderVol);
               var currentCoin = instance.state.currentCoin;
               currentCoin = currentCoin.split('/')[0];
@@ -224,7 +194,7 @@ class TradingPage extends React.Component {
               if (currentCoin === 'XRP') {
                 updateBalance = instance.state.xrpBalance;
               }
-              
+              console.log(newCoinBalance, updateBalance)
               newCoinBalance = Number(newCoinBalance) + Number(updateBalance);
               axios.post('/userBalance', {newUsdBalance: newUsdBalance, newCoinBalance: newCoinBalance, coin: currentCoin}).then((response) => {
                 console.log(response);
@@ -255,7 +225,7 @@ class TradingPage extends React.Component {
           console.log('first order does not enough vol to cover')
         }
       }
-      makeSale(this.state.usdBalance, volume, price, this.state.sellOrders);
+      makeSale(Number(instance.state.usdBalance), Number(volume), Number(price), instance.state.sellOrders);
       // if first order volume > purchase volume 
         // else 
           // send message 'cannot buy this many coins'
