@@ -142,7 +142,7 @@ let findUser = (username, callback) => {
 }
 
 let getUserData = (userid, callback) => {
-  console.log('finding user by id: ', userid);
+  // console.log('finding user by id: ', userid);
   let queryStr = `SELECT id, username, btc_balance, eth_balance, xrp_balance, usd_balance FROM users \
                     WHERE users.id=${userid}`
 
@@ -168,7 +168,7 @@ var getBalancesOfUser = function(id, callback) {
 
 var getBuyOrders = function(pair, callback) {
   let queryStr = `SELECT * FROM orders WHERE type = 'BUY' AND executed = 'false' AND pair = '${pair}' ORDER BY PRICE DESC`;
-  console.log(queryStr);
+  // console.log(queryStr);
   client.query(queryStr, (err, res) => {
     if (err) {
       callback(err, null);
@@ -190,7 +190,7 @@ var getSellOrders = function(pair, callback) {
 }
 
 let updateUserBalance = function(userId, coin, newCoinBalance, newUsdBalance, callback) {
-  console.log('IN DATABASE', userId, coin, newCoinBalance, newUsdBalance);
+  // console.log('IN DATABASE', userId, coin, newCoinBalance, newUsdBalance);
   var updateBalance;
   if (coin === 'BTC') {
     updateBalance = 'btc_balance';
@@ -202,7 +202,7 @@ let updateUserBalance = function(userId, coin, newCoinBalance, newUsdBalance, ca
     updateBalance = 'xrp_balance';
   }
   let queryStr = `UPDATE users SET (${updateBalance}, usd_balance) = (${newCoinBalance}, ${newUsdBalance}) WHERE id = ${userId}`;
-  console.log('QUERYSTR IS', queryStr);
+  // console.log('QUERYSTR IS', queryStr);
   client.query(queryStr, (err, res) => {
     if (err) {
       callback(err, null);
@@ -226,9 +226,9 @@ let insertOrder = function(order, callback) {
 
 }
 
-let getCompletedOrders = function(callback) {
+let getCompletedOrders = function(pair, callback) {
 
-  let queryStr = `SELECT * FROM orders WHERE executed = true ORDER BY time_executed DESC LIMIT 50`;
+  let queryStr = `SELECT * FROM orders WHERE executed = true AND pair = '${pair}' ORDER BY time_executed DESC LIMIT 50`;
   client.query(queryStr, (err, res) => {
     if (err) {
       callback(err, null);
@@ -241,7 +241,7 @@ let getCompletedOrders = function(callback) {
 
 let updateOrders = function(orderId, volume, price, callback) {
   let queryStr = `UPDATE orders SET (quantity, price, executed, time_executed) = (${volume}, ${price}, 'true', '${new Date().toString().split('GMT')[0]}') WHERE id = ${orderId}`;
-  console.log('QUERYSTR IS', queryStr);
+  // console.log('QUERYSTR IS', queryStr);
   client.query(queryStr, (err, res) => {
     if (err) {
       callback(err, null);

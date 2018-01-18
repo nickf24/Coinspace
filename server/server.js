@@ -224,8 +224,8 @@ app.post('/userBalance', (req, res) => {
 });
 
 
-app.get('/completedOrders', (req, res) => {
-  db.getCompletedOrders((err, results) => {
+app.get('/completedOrders/:pair', (req, res) => {
+  db.getCompletedOrders(req.params.pair, (err, results) => {
     if (err) {
       console.log(err);
     } else {

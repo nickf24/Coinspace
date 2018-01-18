@@ -42,19 +42,4 @@ class PastTradesCard extends React.Component {
 
 
 export default PastTradesCard;
-
-     //  <div id="dashCard" className="ui blue raised card orderBook" name='Graph' onClick={this.props.changeLayout} style = {divStyle}> 
-     //    <div className="content"> 
-     //    <h3> Last 50 Trades </h3>
-     //    <table className = "ui celled table">
-     //      <thead>
-     //        <tr> 
-     //          <th> Time </th>
-     //          <th> Volume </th>
-     //          <th> Price </th>
-     //        </tr>
-     //      </thead>
-     //      {rows}
-     //    </table> 
-     //    </div>
-     // </div>  
+  

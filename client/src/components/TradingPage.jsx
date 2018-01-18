@@ -44,7 +44,7 @@ class TradingPage extends React.Component {
 
   handleExchangeBookClick(name) {
     // alert('hey')
-    console.log('setting currentcoin to', name)
+    // console.log('setting currentcoin to', name)
     var instance = this;
     // console.log('IN BUY ORDERS CARD', this.props.currentCoin);
     var currentPair = name.split('/').join('');
@@ -53,7 +53,6 @@ class TradingPage extends React.Component {
         axios.get(`/sells/${currentPair}`).then((response) => {
           // console.log('BUYS ARE', response);
           instance.setState((prevState) => {
-
             return {
               sellOrders: response.data.rows.slice(0, 50),
               buyOrders: buysResponse.data.rows.slice(0, 50),
@@ -67,6 +66,13 @@ class TradingPage extends React.Component {
       console.log(error);
     })
 
+    axios.get(`/completedOrders/${currentPair}`).then((response) => {
+      instance.setState({
+        pastTrades: response.data.rows
+      })
+    }).catch((error) => {
+      console.log(error);
+    })
     
   
   }
@@ -75,7 +81,7 @@ class TradingPage extends React.Component {
     var instance = this;
     var convertToNum = function(str) {
       var output = []; 
-      console.log(str);
+      // console.log(str);
       for (var i = 0; i < str.length; i++) {
         var char = str[i];
         if (char === '.') {
@@ -109,10 +115,12 @@ class TradingPage extends React.Component {
       console.log(error);
     })
 
-    axios.get('/completedOrders').then((response) => {
+    axios.get(`/completedOrders/${currentPair}`).then((response) => {
       instance.setState({
         pastTrades: response.data.rows
       })
+    }).catch((error) => {
+      console.log(error);
     })
 
     axios.get('/user').then((response) => {
@@ -122,7 +130,7 @@ class TradingPage extends React.Component {
       var xrpBal = convertToNum(data[2]);
       var usdBal = convertToNum(data[3]);
 
-      console.log('setting USD Balances to', usdBal)
+      // console.log('setting USD Balances to', usdBal)
       instance.setState((prevState) => {
         return {
           usdBalance: usdBal,
@@ -131,8 +139,6 @@ class TradingPage extends React.Component {
           btcBalance: btcBal
         }
       })
-
-
     }).catch((error) => {
       console.log('error on get', error);
     })
@@ -140,18 +146,18 @@ class TradingPage extends React.Component {
 
   handleBuyButtonClick(volume, price, type) {
     // console.log('HERE')
-    console.log(volume, price, type, this.state.usdBalance, this.state.btcBalance);
+    // console.log(volume, price, type, this.state.usdBalance, this.state.btcBalance);
 
     // execute the order
     // if market order
     var instance = this;
     if (type === 'limit' || type === undefined) {
       // get the first order
-      console.log(this.state.sellOrders);
+      // console.log(this.state.sellOrders);
       var makeSale = function(usdBalance, orderVol, orderPrice, sellOrders) {
         if (usdBalance <= 0) {
           // base case
-          return;
+          return 'finished';
         } 
         // else go through order and complete
         var firstOrder = sellOrders[0];
@@ -178,9 +184,9 @@ class TradingPage extends React.Component {
                   console.log(error);
                 })
               } 
-              console.log('old balances are', usdBalance);
+              // console.log('old balances are', usdBalance);
               var newUsdBalance = Number(usdBalance) - (Number(orderVol) * Number(orderPrice));
-              console.log('new balances are!!', newUsdBalance, orderVol, orderPrice)
+              // console.log('new balances are!!', newUsdBalance, orderVol, orderPrice)
               var newCoinBalance = Number(orderVol);
               var currentCoin = instance.state.currentCoin;
               currentCoin = currentCoin.split('/')[0];
@@ -194,10 +200,10 @@ class TradingPage extends React.Component {
               if (currentCoin === 'XRP') {
                 updateBalance = instance.state.xrpBalance;
               }
-              console.log(newCoinBalance, updateBalance)
+              // console.log(newCoinBalance, updateBalance)
               newCoinBalance = Number(newCoinBalance) + Number(updateBalance);
               axios.post('/userBalance', {newUsdBalance: newUsdBalance, newCoinBalance: newCoinBalance, coin: currentCoin}).then((response) => {
-                console.log(response);
+                // console.log(response);
                 instance.load();
               }).catch((error) => {
                 console.log(error);
@@ -206,7 +212,7 @@ class TradingPage extends React.Component {
               // create a BUY order
               axios.post('/newUserOrder', {type: 'BUY', executed: false, quantity: orderVol, price: orderPrice, 
                 currency: firstOrder.currency, pair: firstOrder.pair, time_executed: null}).then((response) => {
-                  console.log(response);
+                  // console.log(response);
                   instance.load();
                 }).catch((error) => {
                   console.log(error);
@@ -222,6 +228,7 @@ class TradingPage extends React.Component {
           // go through and buy up all of first over
           // make sales with rest of sell orders/remaining balance
           // makeSale(usdBalance) 
+
           console.log('first order does not enough vol to cover')
         }
       }
