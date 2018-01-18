@@ -166,6 +166,29 @@ var getBalancesOfUser = function(email, callback) {
   })
 }
 
+var getBuyOrders = function(pair, callback) {
+  let queryStr = `SELECT * FROM orders WHERE type = 'BUY' AND executed = 'false' AND pair = '${pair}' ORDER BY PRICE DESC`;
+  console.log(queryStr);
+  client.query(queryStr, (err, res) => {
+    if (err) {
+      callback(err, null);
+    } else {
+      callback(null, res);
+    }
+  });
+}
+
+var getSellOrders = function(pair, callback) {
+  let queryStr = `SELECT * FROM orders WHERE type = 'SELL' AND executed = 'false' AND pair = '${pair}' ORDER BY PRICE` ;
+  client.query(queryStr, (err, res) => {
+    if (err) {
+      callback(err, null);
+    } else {
+      callback(null, res);
+    }
+  });
+}
+
 module.exports = {
   client,
   pool,
@@ -173,5 +196,7 @@ module.exports = {
   insertNewUser,
   getBalancesOfUser,
   findUser,
-  getUserData
+  getUserData,
+  getBuyOrders,
+  getSellOrders
 };

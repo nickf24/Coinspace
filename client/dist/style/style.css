@@ -25,8 +25,7 @@
 }
 
 .centered {
-  display: block; margin: 0 auto;
-  display: inline-block;
+  left: 28.5%;
   text-align: center;
 }
 
@@ -91,6 +90,18 @@
   height: 335px;
 }
 
+#dashCard2 {
+  width: 910px;
+  height: 512px;
+  left: 28.5%;
+}
+
+#dashCard3 {
+  width: 530px;
+  height: 417px;
+  
+}
+
 #nextButton {
   margin-bottom: 0px;
   bottom: 3px;
@@ -109,4 +120,22 @@
 
 .mainBackground {
   background-color:;
+}
+
+.grey {
+  background-color: whitesmoke;
+}
+
+#hover: hover {
+  background-color: lightgrey;
+}
+
+/*tbody {
+  overflow-y:scroll;
+  height:225px;
+  display:block;
+}*/
+
+thead {
+  overflow: none;
 }
