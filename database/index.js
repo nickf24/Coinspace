@@ -190,7 +190,19 @@ var getSellOrders = function(pair, callback) {
 }
 
 let updateUserBalance = function(userId, coin, newCoinBalance, newUsdBalance, callback) {
-  let queryStr = ``;
+  console.log('IN DATABASE', userId, coin, newCoinBalance, newUsdBalance);
+  var updateBalance;
+  if (coin === 'BTC') {
+    updateBalance = 'btc_balance';
+  }
+  if (coin === 'ETH') {
+    updateBalance = 'eth_balance';
+  } 
+  if (coin === 'XRP') {
+    updateBalance = 'xrp_balance';
+  }
+  let queryStr = `UPDATE users SET (${updateBalance}, usd_balance) = (${newCoinBalance}, ${newUsdBalance}) WHERE id = ${userId}`;
+  console.log('QUERYSTR IS', queryStr);
   client.query(queryStr, (err, res) => {
     if (err) {
       callback(err, null);

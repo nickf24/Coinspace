@@ -141,10 +141,23 @@ class TradingPage extends React.Component {
             var newCoinBalance = Number(volume);
             var currentCoin = instance.state.currentCoin;
             currentCoin = currentCoin.split('/')[0];
-
-            console.log(newUsdBalance, newCoinBalance, currentCoin);
-
-            // axios.patch('/userBalance', {})
+            var updateBalance;
+            if (currentCoin === 'BTC') {
+              updateBalance = instance.state.btcBalance;
+            }
+            if (currentCoin === 'ETH') {
+              updateBalance = instance.state.ethBalance;
+            } 
+            if (currentCoin === 'XRP') {
+              updateBalance = instance.state.xrpBalance;
+            }
+            
+            newCoinBalance = Number(newCoinBalance) + Number(updateBalance);
+            axios.post('/userBalance', {newUsdBalance: newUsdBalance, newCoinBalance: newCoinBalance, coin: currentCoin}).then((response) => {
+              console.log(response);
+            }).catch((error) => {
+              console.log(error);
+            });
 
           } else {
             console.log('Not enough $$$ in the bank to make this trade!')

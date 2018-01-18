@@ -211,8 +211,10 @@ app.get('/user', (req, res) => {
   // res.send(req.user.toString())
 })
 
-app.patch('/userBalance', (req, res) => {
-  db.updateUserBalance(req.user, coin, newCoinBalance, newUsdBalance, (err, results) => {
+app.post('/userBalance', (req, res) => {
+  console.log(req.body);
+  // res.send('yo')
+  db.updateUserBalance(req.user, req.body.coin, req.body.newCoinBalance, req.body.newUsdBalance, (err, results) => {
     if (err) {
       console.log(err);
     } else {
