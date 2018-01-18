@@ -120,12 +120,44 @@ class TradingPage extends React.Component {
 
     // execute the order
     // if market order
+    var instance = this;
     if (type === 'market' || type === undefined) {
       // get the first order
+      console.log(this.state.sellOrders);
+      var makeSale = function(usdBalance, orderVol, orderPrice, sellOrders) {
+        if (usdBalance <= 0) {
+          // base case
+          return;
+        } 
+        // else go through order and complete
+        var firstOrder = sellOrders[0];
+        if (Number(firstOrder.quantity) > volume) {
+          if (instance.state.usdBalance > (volume * price)) {
+
+            // if buyer has enough usd_balance to cover price
+            // PATCH order to be executed T at the time
+            // PATCH user to update usd_balance and coin balance
+            var newUsdBalance = instance.state.usdBalance - volume * price;
+            var newCoinBalance = Number(volume);
+            var currentCoin = instance.state.currentCoin;
+            currentCoin = currentCoin.split('/')[0];
+
+            console.log(newUsdBalance, newCoinBalance, currentCoin);
+
+            // axios.patch('/userBalance', {})
+
+          } else {
+            console.log('Not enough $$$ in the bank to make this trade!')
+          }
+        } else {
+          // first order does not have enough vol to cover
+          // go through and buy up all of first over
+          // make sales with rest of sell orders/remaining balance
+          makeSale(usdBalance) 
+        }
+      }
+      makeSale(this.state.usdBalance, volume, price, this.state.sellOrders);
       // if first order volume > purchase volume 
-        // if buyer has enough usd_balance to cover price
-          // PATCH order to be executed T at the time
-          // PATCH user to update usd_balance and coin balance
         // else 
           // send message 'cannot buy this many coins'
       // else if purchase volume > first order volume

@@ -210,6 +210,16 @@ app.get('/user', (req, res) => {
   })
   // res.send(req.user.toString())
 })
+
+app.patch('/userBalance', (req, res) => {
+  db.updateUserBalance(req.user, coin, newCoinBalance, newUsdBalance, (err, results) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(results);
+    }
+  })
+})
 // app.get('/init', (req, res) => {
 //   // load historical data into client
 //   Promise.all([db.getYearData(), db.getMonthData(), db.getWeeklyData()])

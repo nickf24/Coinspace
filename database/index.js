@@ -189,6 +189,17 @@ var getSellOrders = function(pair, callback) {
   });
 }
 
+let updateUserBalance = function(userId, coin, newCoinBalance, newUsdBalance, callback) {
+  let queryStr = ``;
+  client.query(queryStr, (err, res) => {
+    if (err) {
+      callback(err, null);
+    } else {
+      callback(null, res);
+    }
+  });
+}
+
 module.exports = {
   client,
   pool,
@@ -198,5 +209,6 @@ module.exports = {
   findUser,
   getUserData,
   getBuyOrders,
-  getSellOrders
+  getSellOrders,
+  updateUserBalance
 };
