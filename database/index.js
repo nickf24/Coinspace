@@ -155,8 +155,8 @@ let getUserData = (userid, callback) => {
   })
 }
 
-var getBalancesOfUser = function(email, callback) {
-  let queryStr = `SELECT (btc_balance, eth_balance, xrp_balance, usd_balance) FROM users WHERE email = '${email}'`;
+var getBalancesOfUser = function(id, callback) {
+  let queryStr = `SELECT (btc_balance, eth_balance, xrp_balance, usd_balance) FROM users WHERE id = '${id}'`;
   client.query(queryStr, (err, res) => {
     if (err) {
       callback(err, null);

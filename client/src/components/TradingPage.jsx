@@ -35,12 +35,36 @@ class TradingPage extends React.Component {
   }
 
   componentDidMount() {
-    // axios.get('/').then((response) => {
-    //   console.log('RESPONSE FROM GET IS', response);
-    // }).catch((error) => {
-    //   console.log('error on get', error);
-    // })
     var instance = this;
+    var convertToNum = function(str) {
+      var output = []; 
+      for (var i = 0; i < str.length; i++) {
+        var char = str[i];
+        if (!isNaN(Number(char))) {
+          output.push(char);
+        }
+      }
+      return output.join('');
+    }
+    axios.get('/user').then((response) => {
+      var data = response.data.rows[0].row.split(',');
+      var btcBal = convertToNum(data[0]);
+      var ethBal = convertToNum(data[1]);
+      var xrpBal = convertToNum(data[2]);
+      var usdBal = convertToNum(data[3]);
+
+
+      instance.setState({
+        usdBalance: usdBal,
+        ethBalance: ethBal,
+        xrpBalance: xrpBal,
+        btcBalance: btcBal
+      })
+
+    }).catch((error) => {
+      console.log('error on get', error);
+    })
+    
     // console.log('IN BUY ORDERS CARD', this.props.currentCoin);
     var currentPair = this.state.currentCoin.split('/').join('');
     axios.get(`/buys/${currentPair}`).then((response) => {
@@ -87,15 +111,12 @@ class TradingPage extends React.Component {
       console.log(error);
     })
   
-    // console.log('name is', this.state.currentCoin);
-
   }
 
-  // changeLayout (e) {
-  //   this.setState({
-  //     page: e.target.name
-  //   });
-  // }
+  handleBuyButtonClick() {
+    
+  }
+
 
   render() {
 
@@ -110,8 +131,8 @@ class TradingPage extends React.Component {
 
             <div className="ui divider"></div> 
             <div className="ui two stackable cards centered">
-              <BuyCard />
-              <SellCard />
+              <BuyCard usdBalance  = {this.state.usdBalance} />
+              <SellCard btcBalance = {this.state.btcBalance} ethBalance = {this.state.ethBalance} xrpBalance = {this.state.xrpBalance}/>
             </div>  
             <div className="ui divider"></div> 
             <div className="ui two stackable cards centered">

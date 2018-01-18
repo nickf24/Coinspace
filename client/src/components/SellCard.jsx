@@ -16,7 +16,7 @@ class SellCard extends React.Component {
   		    <fieldset>
   		  	  <h3> Sell Bitcoin </h3>
   		  	  <div id = 'availableCoinBalance' className = 'field'>
-	  		    <h5> Available BTC: </h5> <span> 0 </span>
+	  		    <h5> Available BTC: </h5> <span> {this.props.btcBalance} </span>
 	  		  </div>
 	  		  <div className = "field">
 	  		    <h5> Order Type: </h5>
@@ -27,7 +27,7 @@ class SellCard extends React.Component {
 
 	      		&nbsp;
 	      		&nbsp;
-	      	    <div class="ui radio checkbox">
+	      	    <div className = "ui radio checkbox">
 	        	  <input type="radio" name="market"/>
 	        	  <label>Limit</label>
 	      	    </div>
@@ -46,7 +46,7 @@ class SellCard extends React.Component {
 	  		  	<span id = 'totalBuyOrder'> - </span>
 	  		  </div>
 	  		  <div id = 'submitOrder'>
-	  		  	<button className = 'ui primary button'> Buy ETH </button>
+	  		  	<button className = 'ui primary button' onClick = {}> Buy ETH </button>
 	  		  </div>
 	  		</fieldset>
   		  </form> 

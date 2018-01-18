@@ -19,7 +19,7 @@ class BuyCard extends React.Component {
   		  	  <h3> Buy Bitcoin </h3>
 			  <div id = 'availableBalance' className = 'field'>
 	  		    <h5> Available USD: </h5>
-	  		    <span> $100,000 </span>
+	  		    <span> {this.props.usdBalance} </span>
 	  		  </div>
 	  		  <div className = "field">
 	  		    <h5> Order Type: </h5>

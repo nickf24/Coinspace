@@ -197,6 +197,19 @@ app.get('/sells/:pair', (req, res) => {
   })
 });
 
+
+app.get('/user', (req, res) => {
+  console.log('userId is',  req.user);
+  // res.send(req.user)
+  db.getBalancesOfUser(req.user, (err, results) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(results);
+    }
+  })
+  // res.send(req.user.toString())
+})
 // app.get('/init', (req, res) => {
 //   // load historical data into client
 //   Promise.all([db.getYearData(), db.getMonthData(), db.getWeeklyData()])
