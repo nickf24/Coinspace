@@ -212,8 +212,35 @@ let updateUserBalance = function(userId, coin, newCoinBalance, newUsdBalance, ca
   });
 }
 
-let updateOrders = function(orderId, callback) {
-  let queryStr = `UPDATE orders SET (executed, time_executed) = ('true', '${new Date().toString().split('GMT')[0]}') WHERE id = ${orderId}`;
+let insertOrder = function(order, callback) {
+
+  var queryStr = `insert into orders (type, executed, quantity, price, currency, pair, time_executed, userid) VALUES ('${order.type}', ${order.executed},
+   ${order.quantity}, ${order.price}, '${order.currency}', '${order.pair}', ${null}, ${order.userid})`;
+   client.query(queryStr, (err, res) => {
+    if (err) {
+      callback(err, null);
+    } else {
+      callback(null, res);
+    }
+  });
+
+}
+
+let getCompletedOrders = function(callback) {
+
+  let queryStr = `SELECT * FROM orders WHERE executed = true ORDER BY time_executed DESC LIMIT 50`;
+  client.query(queryStr, (err, res) => {
+    if (err) {
+      callback(err, null);
+    } else {
+      callback(null, res);
+    }
+  })
+
+}
+
+let updateOrders = function(orderId, volume, price, callback) {
+  let queryStr = `UPDATE orders SET (quantity, price, executed, time_executed) = (${volume}, ${price}, 'true', '${new Date().toString().split('GMT')[0]}') WHERE id = ${orderId}`;
   console.log('QUERYSTR IS', queryStr);
   client.query(queryStr, (err, res) => {
     if (err) {
@@ -235,5 +262,7 @@ module.exports = {
   getBuyOrders,
   getSellOrders,
   updateUserBalance,
-  updateOrders
+  updateOrders,
+  insertOrder,
+  getCompletedOrders
 };

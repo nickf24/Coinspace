@@ -46,7 +46,8 @@ client.query(`CREATE TABLE IF NOT EXISTS orders (
   price NUMERIC,
   currency VARCHAR(200),
   pair VARCHAR(200),
-  time_executed TIMESTAMP
+  time_executed TIMESTAMP,
+  userid INTEGER
 
 )`)
 
@@ -76,7 +77,7 @@ var orders = []
 Generator.Generator(orders, 1028);
 orders.forEach((order, index) => {
   // (TIMESTAMP '${new Date().toString().split('GMT')[0]}') for the timestamp entry
-  var queryStr = `insert into orders (id, type, executed, quantity, price, currency, pair, time_executed) VALUES (${index + 1}, '${order.type}', ${order.executed},
+  var queryStr = `insert into orders (type, executed, quantity, price, currency, pair, time_executed) VALUES ('${order.type}', ${order.executed},
    ${order.quantity}, ${order.price}, '${order.currency}', '${order.pair}', ${null})`
    console.log('Query is', queryStr)
   client.query(queryStr, (err, res) => {

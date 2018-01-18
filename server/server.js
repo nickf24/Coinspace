@@ -223,8 +223,31 @@ app.post('/userBalance', (req, res) => {
   })
 });
 
+
+app.get('/completedOrders', (req, res) => {
+  db.getCompletedOrders((err, results) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(results);
+    }
+  });
+})
+
+app.post('/newOrder', (req, res) => {
+  var order = req.body;
+  console.log('ORDER IS', order);
+  db.insertOrder(order, (err, results) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(results);
+    }
+  })
+})
+
 app.post('/orders', (req, res) => {
-  db.updateOrders(req.body.orderId, (err, results) => {
+  db.updateOrders(req.body.orderId, req.body.quantity, req.body.price, (err, results) => {
     if (err) {
       console.log(err);
     } else {

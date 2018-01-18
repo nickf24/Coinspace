@@ -53,10 +53,10 @@ class TradingPage extends React.Component {
     var currentPair = this.state.currentCoin.split('/').join('');
     axios.get(`/buys/${currentPair}`).then((response) => {
       var buysResponse = response;
-        axios.get(`/buys/${currentPair}`).then((response) => {
+        axios.get(`/sells/${currentPair}`).then((resp) => {
           // console.log('BUYS ARE', response);
           instance.setState({
-            sellOrders: response.data.rows.slice(0, 50),
+            sellOrders: resp.data.rows.slice(0, 50),
             buyOrders: buysResponse.data.rows.slice(0, 50)
           })
         }).catch((error) => {
@@ -127,6 +127,13 @@ class TradingPage extends React.Component {
     }).catch((error) => {
       console.log('error on get', error);
     })
+
+    axios.get('/completedOrders').then((response) => {
+      console.log('completed orders are', response.data.rows)
+      instance.setState({
+        pastTrades: response.data.rows
+      })
+    })
   }
 
   handleBuyButtonClick(volume, price, type) {
@@ -146,20 +153,29 @@ class TradingPage extends React.Component {
         } 
         // else go through order and complete
         var firstOrder = sellOrders[0];
-        if (Number(firstOrder.quantity) > volume) {
-          if (instance.state.usdBalance > (volume * price)) {
+        console.log('first order is', firstOrder);
+        if (Number(firstOrder.quantity) > orderVol) {
+          if (instance.state.usdBalance > (orderVol * orderPrice)) {
 
             // if buyer has enough usd_balance to cover price
             // PATCH order to be executed T at the time
             // PATCH user to update usd_balance and coin balance
-            axios.post('/orders', {orderId: firstOrder.id}).then((response) => {
+            // CREATE NEW order with remaining quantity
+            axios.post('/orders', {orderId: firstOrder.id, quantity: orderVol, price: orderPrice}).then((response) => {
+              console.log(response);
+            }).catch((error) => {
+              console.log(error);
+            });
+
+            var newQuantity = firstOrder.quantity - orderVol;
+            axios.post('/newOrder', {type: firstOrder.type, executed: false, quantity: newQuantity, price: firstOrder.price, currency: firstOrder.currency, pair: firstOrder.pair, time_executed: null, userid: firstOrder.userid}).then((response) => {
               console.log(response);
             }).catch((error) => {
               console.log(error);
             })
 
-            var newUsdBalance = instance.state.usdBalance - volume * price;
-            var newCoinBalance = Number(volume);
+            var newUsdBalance = Number(instance.state.usdBalance) - Number(orderVol) * Number(orderPrice);
+            var newCoinBalance = Number(orderVol);
             var currentCoin = instance.state.currentCoin;
             currentCoin = currentCoin.split('/')[0];
             var updateBalance;
@@ -188,7 +204,8 @@ class TradingPage extends React.Component {
           // first order does not have enough vol to cover
           // go through and buy up all of first over
           // make sales with rest of sell orders/remaining balance
-          makeSale(usdBalance) 
+          // makeSale(usdBalance) 
+          console.log('first order does not enough vol to cover')
         }
       }
       makeSale(this.state.usdBalance, volume, price, this.state.sellOrders);
@@ -244,7 +261,7 @@ class TradingPage extends React.Component {
             <div className="ui divider"></div> 
             <div className="ui two stackable cards centered">
               <MarketsCard clickFn = {this.handleExchangeBookClick.bind(this)} currentCoin = {this.state.currentCoin}/>
-              <PastTradesCard currentCoin = {this.state.currentCoin}/>
+              <PastTradesCard currentCoin = {this.state.currentCoin} pastTrades = {this.state.pastTrades}/>
             </div>
             <div className="ui divider"></div> 
             <div className="ui two stackable cards centered">

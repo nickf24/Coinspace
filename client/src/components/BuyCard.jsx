@@ -56,7 +56,7 @@ class BuyCard extends React.Component {
 	  		  	<span id = 'totalBuyOrder'> {this.state.total} </span>
 	  		  </div>
 	  		  <div id = 'submitOrder'>
-	  		  	<button className = 'ui primary button' type = 'button' onClick = {() => this.props.clickFn(document.getElementById('buyVolume').value,document.getElementById('buyPrice').value,  $('input[type="radio"][name="marketBuy"]:checked').val() )}> Buy {coin} </button>
+	  		  	<button className = 'ui primary button' onClick = {() => this.props.clickFn(document.getElementById('buyVolume').value,document.getElementById('buyPrice').value,  $('input[type="radio"][name="marketBuy"]:checked').val() )}> Buy {coin} </button>
 	  		  </div>
 	  		</fieldset>
   		  </form> 

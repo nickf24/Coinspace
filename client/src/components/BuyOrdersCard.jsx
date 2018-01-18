@@ -7,33 +7,12 @@ class BuyOrdersCard extends React.Component {
   	super(props);
   }
 
-  componentDidMount() {
-    // var instance = this;
-    // console.log('IN BUY ORDERS CARD', this.props.currentCoin);
-    // var currentPair = this.props.currentCoin.split('/').join('');
-    // axios.get(`/buys/${currentPair}`).then((response) => {
-    //   console.log('BUYS ARE', response);
-    //   instance.setState({
-    //     orders: response.data.rows.slice(0, 50)
-    //   })
-    // })
-  }
-
-
   render() {
-  	// should only show markets for this.props.currentCoin
+    
     var divStyle = {
       'overflowY': "scroll"
     }
-    // var instance = this;
-    //  var currentPair = this.props.currentCoin.split('/').join('');
-    // axios.get(`/buys/${currentPair}`).then((response) => {
-    //   console.log('BUYS ARE', response);
-    //   instance.setState({
-    //     orders: response.data.rows.slice(0, 50)
-    //   })
-    // })
-    // console.log(this.props.orders);
+
     var orderRows = null;
     if (this.props.orders) {
       orderRows = <tbody>{this.props.orders.map((order, index) => <OrderBookRow key = {index} order = {order}/>)}</tbody>
