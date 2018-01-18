@@ -142,7 +142,7 @@ let findUser = (username, callback) => {
 }
 
 let getUserData = (userid, callback) => {
-  console.log('finding user by id: ', userid);
+  // console.log('finding user by id: ', userid);
   let queryStr = `SELECT id, username, btc_balance, eth_balance, xrp_balance, usd_balance FROM users \
                     WHERE users.id=${userid}`
 
@@ -155,8 +155,8 @@ let getUserData = (userid, callback) => {
   })
 }
 
-var getBalancesOfUser = function(email, callback) {
-  let queryStr = `SELECT (btc_balance, eth_balance, xrp_balance, usd_balance) FROM users WHERE email = '${email}'`;
+var getBalancesOfUser = function(id, callback) {
+  let queryStr = `SELECT (btc_balance, eth_balance, xrp_balance, usd_balance) FROM users WHERE id = '${id}'`;
   client.query(queryStr, (err, res) => {
     if (err) {
       callback(err, null);
@@ -168,7 +168,7 @@ var getBalancesOfUser = function(email, callback) {
 
 var getBuyOrders = function(pair, callback) {
   let queryStr = `SELECT * FROM orders WHERE type = 'BUY' AND executed = 'false' AND pair = '${pair}' ORDER BY PRICE DESC`;
-  console.log(queryStr);
+  // console.log(queryStr);
   client.query(queryStr, (err, res) => {
     if (err) {
       callback(err, null);
@@ -189,6 +189,68 @@ var getSellOrders = function(pair, callback) {
   });
 }
 
+let updateUserBalance = function(userId, coin, newCoinBalance, newUsdBalance, callback) {
+  // console.log('IN DATABASE', userId, coin, newCoinBalance, newUsdBalance);
+  var updateBalance;
+  if (coin === 'BTC') {
+    updateBalance = 'btc_balance';
+  }
+  if (coin === 'ETH') {
+    updateBalance = 'eth_balance';
+  } 
+  if (coin === 'XRP') {
+    updateBalance = 'xrp_balance';
+  }
+  let queryStr = `UPDATE users SET (${updateBalance}, usd_balance) = (${newCoinBalance}, ${newUsdBalance}) WHERE id = ${userId}`;
+  // console.log('QUERYSTR IS', queryStr);
+  client.query(queryStr, (err, res) => {
+    if (err) {
+      callback(err, null);
+    } else {
+      callback(null, res);
+    }
+  });
+}
+
+let insertOrder = function(order, callback) {
+
+  var queryStr = `insert into orders (type, executed, quantity, price, currency, pair, time_executed, userid) VALUES ('${order.type}', ${order.executed},
+   ${order.quantity}, ${order.price}, '${order.currency}', '${order.pair}', ${null}, ${order.userid})`;
+   client.query(queryStr, (err, res) => {
+    if (err) {
+      callback(err, null);
+    } else {
+      callback(null, res);
+    }
+  });
+
+}
+
+let getCompletedOrders = function(pair, callback) {
+
+  let queryStr = `SELECT * FROM orders WHERE executed = true AND pair = '${pair}' ORDER BY time_executed DESC LIMIT 50`;
+  client.query(queryStr, (err, res) => {
+    if (err) {
+      callback(err, null);
+    } else {
+      callback(null, res);
+    }
+  })
+
+}
+
+let updateOrders = function(orderId, volume, price, callback) {
+  let queryStr = `UPDATE orders SET (quantity, price, executed, time_executed) = (${volume}, ${price}, 'true', '${new Date().toString().split('GMT')[0]}') WHERE id = ${orderId}`;
+  // console.log('QUERYSTR IS', queryStr);
+  client.query(queryStr, (err, res) => {
+    if (err) {
+      callback(err, null);
+    } else {
+      callback(null, res);
+    }
+  });
+}
+
 module.exports = {
   client,
   pool,
@@ -198,5 +260,9 @@ module.exports = {
   findUser,
   getUserData,
   getBuyOrders,
-  getSellOrders
+  getSellOrders,
+  updateUserBalance,
+  updateOrders,
+  insertOrder,
+  getCompletedOrders
 };

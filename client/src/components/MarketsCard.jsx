@@ -18,7 +18,7 @@ class MarketsCard extends React.Component {
   render() {
 
     const coins = [{name: 'Bitcoin', pair: 'BTC/USD'}, {name: 'Ethereum', pair: 'ETH/USD'}, 
-    {name: 'Ripple', pair: 'XRP/USD'}, {name: 'Ethereum', pair: 'ETH/BTC'}, {name: 'Ripple', pair: 'XRP/BTC'}];
+    {name: 'Ripple', pair: 'XRP/USD'}];
     // this.props.orders.map((order, index) => <OrderBookRow order = {order} key = {index}/>)
     // should always show all markets
   	return (

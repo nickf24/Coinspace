@@ -1,12 +1,9 @@
 import React from 'react';
 import OrderBookRow from './OrderBookRow.jsx';
-const axios = require('axios')
-
 
 class SellOrdersCard extends React.Component {
   constructor(props) {
   	super(props);
- 
   }
 
 
@@ -16,6 +13,7 @@ class SellOrdersCard extends React.Component {
     var divStyle = {
       'overflowY': "scroll"
     }
+
     var orderRows = null;
     if (this.props.orders) {
       orderRows = <tbody>{this.props.orders.map((order, index) => <OrderBookRow key = {index} order = {order}/>)}</tbody>

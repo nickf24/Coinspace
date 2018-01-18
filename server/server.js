@@ -197,15 +197,78 @@ app.get('/sells/:pair', (req, res) => {
   })
 });
 
-// app.get('/init', (req, res) => {
-//   // load historical data into client
-//   Promise.all([db.getYearData(), db.getMonthData(), db.getWeeklyData()])
-//     .then(results => {
-//       res.json(results);
-//     }).catch(err => {
-//       console.log('init err', err);
-//     });
-// });
+
+app.get('/user', (req, res) => {
+  console.log('userId is',  req.user);
+  // res.send(req.user)
+  db.getBalancesOfUser(req.user, (err, results) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(results);
+    }
+  })
+  // res.send(req.user.toString())
+})
+
+app.post('/userBalance', (req, res) => {
+  console.log(req.body);
+  // res.send('yo')
+  db.updateUserBalance(req.user, req.body.coin, req.body.newCoinBalance, req.body.newUsdBalance, (err, results) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(results);
+    }
+  })
+});
+
+
+app.get('/completedOrders/:pair', (req, res) => {
+  db.getCompletedOrders(req.params.pair, (err, results) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(results);
+    }
+  });
+})
+//
+
+app.post('/newOrder', (req, res) => {
+  var order = req.body;
+  console.log('ORDER IS', order);
+  db.insertOrder(order, (err, results) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(results);
+    }
+  })
+})
+app.post('/newUserOrder', (req, res) => {
+  var order = req.body;
+  order.userid = req.user;
+  console.log('ORDER IS', order);
+  db.insertOrder(order, (err, results) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(results);
+    }
+  })
+})
+
+
+app.post('/orders', (req, res) => {
+  db.updateOrders(req.body.orderId, req.body.quantity, req.body.price, (err, results) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(results);
+    }
+  })
+})
 
 //// USER SERIALIZATION PROCESS ////
 passport.serializeUser(function(userid, done) {

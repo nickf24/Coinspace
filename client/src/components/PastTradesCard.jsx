@@ -1,5 +1,5 @@
 import React from 'react';
-import OrderBookRow from './OrderBookRow.jsx';
+import PastTradesRow from './PastTradesRow.jsx';
 
 
 class PastTradesCard extends React.Component {
@@ -9,9 +9,17 @@ class PastTradesCard extends React.Component {
 
 
   render() {
-  	return (
+    var rows = null;
+    var divStyle = {
+      'overflowY': "scroll"
+    }
+    if (this.props.pastTrades) {
+      rows = <tbody>{this.props.pastTrades.map((trade, index) => <PastTradesRow key = {index} order = {trade} /> )}</tbody> 
+    }
+    
 
-  	  <div id="dashCard" className="ui blue raised card" name='Graph' onClick={this.props.changeLayout}> 
+  	return (
+     <div id="dashCard" className="ui blue raised card orderBook" name='Graph' onClick={this.props.changeLayout} style = {divStyle}> 
         <div className="content"> 
         <h3> Last 50 Trades </h3>
         <table className = "ui celled table">
@@ -22,14 +30,10 @@ class PastTradesCard extends React.Component {
               <th> Price </th>
             </tr>
           </thead>
-          <tbody> 
-            <OrderBookRow />
-
-          </tbody>
+          {rows}
         </table> 
         </div>
      </div>  
-
   	)
   }
 
@@ -38,3 +42,4 @@ class PastTradesCard extends React.Component {
 
 
 export default PastTradesCard;
+  

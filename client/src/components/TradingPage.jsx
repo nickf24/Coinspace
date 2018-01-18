@@ -35,39 +35,16 @@ class TradingPage extends React.Component {
   }
 
   componentDidMount() {
-    // axios.get('/').then((response) => {
-    //   console.log('RESPONSE FROM GET IS', response);
-    // }).catch((error) => {
-    //   console.log('error on get', error);
-    // })
-    var instance = this;
-    // console.log('IN BUY ORDERS CARD', this.props.currentCoin);
-    var currentPair = this.state.currentCoin.split('/').join('');
-    axios.get(`/buys/${currentPair}`).then((response) => {
-      var buysResponse = response;
-        axios.get(`/buys/${currentPair}`).then((response) => {
-          // console.log('BUYS ARE', response);
-          instance.setState({
-            sellOrders: response.data.rows.slice(0, 50),
-            buyOrders: buysResponse.data.rows.slice(0, 50)
-          })
-        }).catch((error) => {
-          console.log(error);
-        })
-    }).catch((error) => {
-      console.log(error);
-    })
-
+    this.load()
   }
-
 
   changeLayout (e) {
     console.log(e.target);
   }
 
   handleExchangeBookClick(name) {
-    // alert('hey')
-    console.log('setting currentcoin to', name)
+
+    // console.log('setting currentcoin to', name)
     var instance = this;
     // console.log('IN BUY ORDERS CARD', this.props.currentCoin);
     var currentPair = name.split('/').join('');
@@ -75,10 +52,12 @@ class TradingPage extends React.Component {
       var buysResponse = response;
         axios.get(`/sells/${currentPair}`).then((response) => {
           // console.log('BUYS ARE', response);
-          instance.setState({
-            sellOrders: response.data.rows.slice(0, 50),
-            buyOrders: buysResponse.data.rows.slice(0, 50),
-            currentCoin: name
+          instance.setState((prevState) => {
+            return {
+              sellOrders: response.data.rows.slice(0, 50),
+              buyOrders: buysResponse.data.rows.slice(0, 50),
+              currentCoin: name
+            }
           })
         }).catch((error) => {
           console.log(error);
@@ -86,16 +65,206 @@ class TradingPage extends React.Component {
     }).catch((error) => {
       console.log(error);
     })
+
+    axios.get(`/completedOrders/${currentPair}`).then((response) => {
+      instance.setState({
+        pastTrades: response.data.rows
+      })
+    }).catch((error) => {
+      console.log(error);
+    })
+    
   
-    // console.log('name is', this.state.currentCoin);
+  }
+
+  load() {
+    var instance = this;
+    var convertToNum = function(str) {
+      var output = []; 
+      // console.log(str);
+      for (var i = 0; i < str.length; i++) {
+        var char = str[i];
+        if (char === '.') {
+          output.push(char);
+        } 
+        else if (!isNaN(Number(char))) {
+          output.push(char);
+        }
+      }
+      return output.join('');
+    }
+ 
+
+    var currentCoin = instance.state.currentCoin;
+    var currentPair = currentCoin.split('/').join('');
+
+    axios.get(`/buys/${currentPair}`).then((response) => {
+      var buysResponse = response;
+        axios.get(`/sells/${currentPair}`).then((response) => {
+          instance.setState((prevState) => {
+            return {
+              sellOrders: response.data.rows.slice(0, 50),
+              buyOrders: buysResponse.data.rows.slice(0, 50),
+              currentCoin: prevState.currentCoin
+            }
+          })
+        }).catch((error) => {
+          console.log(error);
+        })
+    }).catch((error) => {
+      console.log(error);
+    })
+
+    axios.get(`/completedOrders/${currentPair}`).then((response) => {
+      instance.setState({
+        pastTrades: response.data.rows
+      })
+    }).catch((error) => {
+      console.log(error);
+    })
+
+    axios.get('/user').then((response) => {
+      var data = response.data.rows[0].row.split(',');
+      var btcBal = convertToNum(data[0]);
+      var ethBal = convertToNum(data[1]);
+      var xrpBal = convertToNum(data[2]);
+      var usdBal = convertToNum(data[3]);
+
+      // console.log('setting USD Balances to', usdBal)
+      instance.setState((prevState) => {
+        return {
+          usdBalance: usdBal,
+          ethBalance: ethBal,
+          xrpBalance: xrpBal,
+          btcBalance: btcBal
+        }
+      })
+    }).catch((error) => {
+      console.log('error on get', error);
+    })
+  }
+
+  handleBuyButtonClick(volume, price, type) {
+    // console.log('HERE')
+    // console.log(volume, price, type, this.state.usdBalance, this.state.btcBalance);
+
+    // execute the order
+    // if market order
+    var instance = this;
+    if (type === 'limit' || type === undefined) {
+      // get the first order
+      // console.log(this.state.sellOrders);
+      var makeSale = function(usdBalance, orderVol, orderPrice, sellOrders) {
+        if (usdBalance <= 0) {
+          // base case
+          return 'finished';
+        } 
+        // else go through order and complete
+        var firstOrder = sellOrders[0];
+        console.log('first order is', firstOrder);
+        if (Number(firstOrder.quantity) >= orderVol) {
+          if (usdBalance > (orderVol * orderPrice)) {
+            if (orderPrice >= Number(firstOrder.price)) {
+            // if buyer has enough usd_balance to cover price
+            // PATCH order to be executed T at the time
+            // PATCH user to update usd_balance and coin balance
+            // CREATE NEW order with remaining quantity
+              axios.post('/orders', {orderId: firstOrder.id, quantity: orderVol, price: orderPrice}).then((response) => {
+                console.log(response);
+              }).catch((error) => {
+                console.log(error);
+              });
+
+              var newQuantity = firstOrder.quantity - orderVol;
+              if (newQuantity !== 0) {
+                axios.post('/newOrder', {type: firstOrder.type, executed: false, quantity: newQuantity, price: firstOrder.price, currency: firstOrder.currency, pair: firstOrder.pair, time_executed: null, userid: firstOrder.userid}).then((response) => {
+                  console.log(response);
+                  instance.load();
+                }).catch((error) => {
+                  console.log(error);
+                })
+              } 
+              // console.log('old balances are', usdBalance);
+              var newUsdBalance = Number(usdBalance) - (Number(orderVol) * Number(orderPrice));
+              // console.log('new balances are!!', newUsdBalance, orderVol, orderPrice)
+              var newCoinBalance = Number(orderVol);
+              var currentCoin = instance.state.currentCoin;
+              currentCoin = currentCoin.split('/')[0];
+              var updateBalance;
+              if (currentCoin === 'BTC') {
+                updateBalance = instance.state.btcBalance;
+              }
+              if (currentCoin === 'ETH') {
+                updateBalance = instance.state.ethBalance;
+              } 
+              if (currentCoin === 'XRP') {
+                updateBalance = instance.state.xrpBalance;
+              }
+              // console.log(newCoinBalance, updateBalance)
+              newCoinBalance = Number(newCoinBalance) + Number(updateBalance);
+              axios.post('/userBalance', {newUsdBalance: newUsdBalance, newCoinBalance: newCoinBalance, coin: currentCoin}).then((response) => {
+                // console.log(response);
+                instance.load();
+              }).catch((error) => {
+                console.log(error);
+              });
+            } else  {
+              // create a BUY order
+              axios.post('/newUserOrder', {type: 'BUY', executed: false, quantity: orderVol, price: orderPrice, 
+                currency: firstOrder.currency, pair: firstOrder.pair, time_executed: null}).then((response) => {
+                  // console.log(response);
+                  instance.load();
+                }).catch((error) => {
+                  console.log(error);
+                })
+              console.log('dont be cheap, your price is too low');
+            }
+
+          } else {
+            console.log('Not enough $$$ in the bank to make this trade!')
+          }
+        } else {
+          // first order does not have enough vol to cover
+          // go through and buy up all of first over
+          // make sales with rest of sell orders/remaining balance
+          // makeSale(usdBalance) 
+
+          console.log('first order does not enough vol to cover')
+        }
+      }
+      makeSale(Number(instance.state.usdBalance), Number(volume), Number(price), instance.state.sellOrders);
+      // if first order volume > purchase volume 
+        // else 
+          // send message 'cannot buy this many coins'
+      // else if purchase volume > first order volume
+        // var sum = 0;
+        // var usd_balance = current user's usd_balance
+        
+
+    } else {
+      // if limit order
+      // if limit order price < highest current bid
+        // buy as much up of the coin as possible
+        // if it doesnt run out
+          // finish
+        // else 
+          // order will sit there for the remainign unpurchased Quantity
+      // if limit order > highest current bid
+        // POST new ORDER to DB 
+    } 
+     
+           
+    
+
+    // reduce the user's USD balance by volume
+    // increase the user's coin balance by coin volume bought
 
   }
 
-  // changeLayout (e) {
-  //   this.setState({
-  //     page: e.target.name
-  //   });
-  // }
+
+  handleSellButtonClick(volume, price, type) {
+    console.log(volume, price, type)
+  }
 
   render() {
 
@@ -110,13 +279,13 @@ class TradingPage extends React.Component {
 
             <div className="ui divider"></div> 
             <div className="ui two stackable cards centered">
-              <BuyCard />
-              <SellCard />
+              <BuyCard usdBalance  = {this.state.usdBalance} currentCoin = {this.state.currentCoin} clickFn = {this.handleBuyButtonClick.bind(this)}/>
+              <SellCard currentCoin = {this.state.currentCoin} btcBalance = {this.state.btcBalance} clickFn = {this.handleSellButtonClick.bind(this)} ethBalance = {this.state.ethBalance} xrpBalance = {this.state.xrpBalance}/>
             </div>  
             <div className="ui divider"></div> 
             <div className="ui two stackable cards centered">
               <MarketsCard clickFn = {this.handleExchangeBookClick.bind(this)} currentCoin = {this.state.currentCoin}/>
-              <PastTradesCard currentCoin = {this.state.currentCoin}/>
+              <PastTradesCard currentCoin = {this.state.currentCoin} pastTrades = {this.state.pastTrades}/>
             </div>
             <div className="ui divider"></div> 
             <div className="ui two stackable cards centered">
