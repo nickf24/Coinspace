@@ -46,6 +46,7 @@ class TradingPage extends React.Component {
       }
       return output.join('');
     }
+
     axios.get('/user').then((response) => {
       var data = response.data.rows[0].row.split(',');
       var btcBal = convertToNum(data[0]);
@@ -113,8 +114,43 @@ class TradingPage extends React.Component {
   
   }
 
-  handleBuyButtonClick() {
+  handleBuyButtonClick(volume, price, type) {
+    // console.log('HERE')
+    console.log(volume, price, type, this.state.usdBalance, this.state.btcBalance);
+
+    // execute the order
+    // if market order
+    if (type === 'market' || type === undefined) {
+      // get the first order
+      // if first order volume > purchase volume 
+        // if buyer has enough usd_balance to cover price
+          // PATCH order to be executed T at the time
+          // PATCH user to update usd_balance and coin balance
+        // else 
+          // send message 'cannot buy this many coins'
+      // else if purchase volume > first order volume
+        // var sum = 0;
+        // var usd_balance = current user's usd_balance
+        
+
+    } else {
+      // if limit order
+      // if limit order price < highest current bid
+        // buy as much up of the coin as possible
+        // if it doesnt run out
+          // finish
+        // else 
+          // order will sit there for the remainign unpurchased Quantity
+      // if limit order > highest current bid
+        // POST new ORDER to DB 
+    } 
+     
+           
     
+
+    // reduce the user's USD balance by volume
+    // increase the user's coin balance by coin volume bought
+
   }
 
 
@@ -131,8 +167,8 @@ class TradingPage extends React.Component {
 
             <div className="ui divider"></div> 
             <div className="ui two stackable cards centered">
-              <BuyCard usdBalance  = {this.state.usdBalance} />
-              <SellCard btcBalance = {this.state.btcBalance} ethBalance = {this.state.ethBalance} xrpBalance = {this.state.xrpBalance}/>
+              <BuyCard usdBalance  = {this.state.usdBalance} currentCoin = {this.state.currentCoin} clickFn = {this.handleBuyButtonClick.bind(this)}/>
+              <SellCard currentCoin = {this.state.currentCoin} btcBalance = {this.state.btcBalance} ethBalance = {this.state.ethBalance} xrpBalance = {this.state.xrpBalance}/>
             </div>  
             <div className="ui divider"></div> 
             <div className="ui two stackable cards centered">
