@@ -43,7 +43,7 @@ class TradingPage extends React.Component {
   }
 
   handleExchangeBookClick(name) {
-    // alert('hey')
+
     // console.log('setting currentcoin to', name)
     var instance = this;
     // console.log('IN BUY ORDERS CARD', this.props.currentCoin);
