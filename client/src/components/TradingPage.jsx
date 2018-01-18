@@ -17,7 +17,7 @@ class TradingPage extends React.Component {
     super(props);
     this.state = {
       page: 'Markets',
-      currentCoin: 'Bitcoin'
+      currentCoin: 'BTC/USD'
     };
 
     this.chartData = {
@@ -31,13 +31,31 @@ class TradingPage extends React.Component {
     };
     
     this.changeLayout = this.changeLayout.bind(this);
+    this.handleExchangeBookClick = this.handleExchangeBookClick.bind(this);
   }
 
   componentDidMount() {
-    axios.get('/sign/balance').then((response) => {
-      console.log('RESPONSE FROM GET IS', response);
+    // axios.get('/').then((response) => {
+    //   console.log('RESPONSE FROM GET IS', response);
+    // }).catch((error) => {
+    //   console.log('error on get', error);
+    // })
+    var instance = this;
+    // console.log('IN BUY ORDERS CARD', this.props.currentCoin);
+    var currentPair = this.state.currentCoin.split('/').join('');
+    axios.get(`/buys/${currentPair}`).then((response) => {
+      var buysResponse = response;
+        axios.get(`/buys/${currentPair}`).then((response) => {
+          // console.log('BUYS ARE', response);
+          instance.setState({
+            sellOrders: response.data.rows.slice(0, 50),
+            buyOrders: buysResponse.data.rows.slice(0, 50)
+          })
+        }).catch((error) => {
+          console.log(error);
+        })
     }).catch((error) => {
-      console.log('error on get', error);
+      console.log(error);
     })
 
   }
@@ -49,10 +67,28 @@ class TradingPage extends React.Component {
 
   handleExchangeBookClick(name) {
     // alert('hey')
-    console.log('name is', name);
-    this.setState({
-      currentCoin: name
-    });
+    console.log('setting currentcoin to', name)
+    var instance = this;
+    // console.log('IN BUY ORDERS CARD', this.props.currentCoin);
+    var currentPair = name.split('/').join('');
+    axios.get(`/buys/${currentPair}`).then((response) => {
+      var buysResponse = response;
+        axios.get(`/sells/${currentPair}`).then((response) => {
+          // console.log('BUYS ARE', response);
+          instance.setState({
+            sellOrders: response.data.rows.slice(0, 50),
+            buyOrders: buysResponse.data.rows.slice(0, 50),
+            currentCoin: name
+          })
+        }).catch((error) => {
+          console.log(error);
+        })
+    }).catch((error) => {
+      console.log(error);
+    })
+  
+    // console.log('name is', this.state.currentCoin);
+
   }
 
   // changeLayout (e) {
@@ -84,8 +120,8 @@ class TradingPage extends React.Component {
             </div>
             <div className="ui divider"></div> 
             <div className="ui two stackable cards centered">
-              <BuyOrdersCard currentCoin = {this.state.currentCoin}/>
-              <SellOrdersCard currentCoin = {this.state.currentCoin}/>
+              <BuyOrdersCard currentCoin = {this.state.currentCoin} orders = {this.state.buyOrders}/>
+              <SellOrdersCard currentCoin = {this.state.currentCoin} orders = {this.state.sellOrders}/>
               {/* -------------- The Content Space HTML Ends here -------------------------*/}
             </div>
           </div>

@@ -173,9 +173,11 @@ app.get('/balance', (req, res) => {
     }
   })
 })
+//
 
-app.get('/buys', (req, res) => {
-  db.getBuyOrders((err, results) => {
+app.get('/buys/:pair', (req, res) => {
+  console.log('GETTING BUYS FROM', req.params.pair);
+  db.getBuyOrders(req.params.pair, (err, results) => {
     if (err) {
       console.log(err);
     } else {
@@ -185,8 +187,8 @@ app.get('/buys', (req, res) => {
 });
 
 
-app.get('/sells', (req, res) => {
-  db.getSellOrders((err, results) => {
+app.get('/sells/:pair', (req, res) => {
+  db.getSellOrders(req.params.pair, (err, results) => {
     if (err) {
       console.log(err);
     } else {

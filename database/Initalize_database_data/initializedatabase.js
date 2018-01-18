@@ -73,7 +73,7 @@ coins.forEach((coin, index) => {
 });
 
 var orders = []
-Generator.Generator(orders, 'ETH', 1028);
+Generator.Generator(orders, 1028);
 orders.forEach((order, index) => {
   // (TIMESTAMP '${new Date().toString().split('GMT')[0]}') for the timestamp entry
   var queryStr = `insert into orders (id, type, executed, quantity, price, currency, pair, time_executed) VALUES (${index + 1}, '${order.type}', ${order.executed},
@@ -97,18 +97,18 @@ client.query(`CREATE TABLE IF NOT EXISTS price_history (
 
 client.query('alter table price_history add constraint id unique(coin_id, time_stamp)');
 
-const data = [require('./BTCUSDHistoricalData.js'), require('./ETHUSDHistoricalData.js'), require('./LTCUSDHistoricalData.js'), require('./XRPUSDHistoricalData.js')];
+// const data = [require('./BTCUSDHistoricalData.js'), require('./ETHUSDHistoricalData.js'), require('./LTCUSDHistoricalData.js'), require('./XRPUSDHistoricalData.js')];
 
-data.forEach((history, index) => {
-  history.forEach((dateObj) => {
-    let date = dateObj.Date;
-    let coinId = index + 1;
-    let price = dateObj.Open;
-    client.query(`insert into price_history (coin_id, time_stamp, price) values (${coinId}, '${date} 12', ${price})`, (err, res) => {
-      if (err) {
-        console.log('Insertion Error', err);
-      }
-      console.log(coinId, price, 'Daily Data Insertion Success');
-    });
-  });
-});
+// data.forEach((history, index) => {
+//   history.forEach((dateObj) => {
+//     let date = dateObj.Date;
+//     let coinId = index + 1;
+//     let price = dateObj.Open;
+//     client.query(`insert into price_history (coin_id, time_stamp, price) values (${coinId}, '${date} 12', ${price})`, (err, res) => {
+//       if (err) {
+//         console.log('Insertion Error', err);
+//       }
+//       console.log(coinId, price, 'Daily Data Insertion Success');
+//     });
+//   });
+// });

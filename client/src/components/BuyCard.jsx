@@ -30,7 +30,7 @@ class BuyCard extends React.Component {
 
 	      		&nbsp;
 	      		&nbsp;
-	      	    <div class="ui radio checkbox">
+	      	    <div className = "ui radio checkbox">
 	        	  <input type="radio" name="market"/>
 	        	  <label>Limit</label>
 	      	    </div>

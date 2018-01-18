@@ -29,7 +29,7 @@ class ExchangeBookRow extends React.Component {
   	}
 
   	return (
-  	  <tr onClick = {() => this.props.clickFn(this.props.name)} className = {classname} id = 'hover'> 
+  	  <tr onClick = {() => this.props.clickFn(this.props.pair)} className = {classname} id = 'hover'> 
         <td> {this.props.name} </td>
         <td> {this.props.pair} </td>
         <td> {this.props.price} </td>

@@ -5,19 +5,18 @@ const axios = require('axios')
 class BuyOrdersCard extends React.Component {
   constructor(props) {
   	super(props);
-    this.state = {
-      orders: []
-    }
   }
 
   componentDidMount() {
-    var instance = this;
-    axios.get('/buys').then((response) => {
-      // console.log('BUYS ARE', response);
-      instance.setState({
-        orders: response.data.rows.slice(0, 50)
-      })
-    })
+    // var instance = this;
+    // console.log('IN BUY ORDERS CARD', this.props.currentCoin);
+    // var currentPair = this.props.currentCoin.split('/').join('');
+    // axios.get(`/buys/${currentPair}`).then((response) => {
+    //   console.log('BUYS ARE', response);
+    //   instance.setState({
+    //     orders: response.data.rows.slice(0, 50)
+    //   })
+    // })
   }
 
 
@@ -25,6 +24,19 @@ class BuyOrdersCard extends React.Component {
   	// should only show markets for this.props.currentCoin
     var divStyle = {
       'overflowY': "scroll"
+    }
+    // var instance = this;
+    //  var currentPair = this.props.currentCoin.split('/').join('');
+    // axios.get(`/buys/${currentPair}`).then((response) => {
+    //   console.log('BUYS ARE', response);
+    //   instance.setState({
+    //     orders: response.data.rows.slice(0, 50)
+    //   })
+    // })
+    // console.log(this.props.orders);
+    var orderRows = null;
+    if (this.props.orders) {
+      orderRows = <tbody>{this.props.orders.map((order, index) => <OrderBookRow key = {index} order = {order}/>)}</tbody>
     }
     return (
 
@@ -35,14 +47,11 @@ class BuyOrdersCard extends React.Component {
           <thead className = "orderBookHeader">
             <tr> 
               <th> Price (USD) </th>
-              <th> Volume (BTC) </th>
+              <th> Volume {this.props.currentCoin} </th>
               <th> Value (USD) </th>
             </tr>
           </thead>
-          <tbody> 
-          {this.state.orders.map((order, index) => <OrderBookRow key = {index} order = {order}/>)}
-
-          </tbody>
+            {orderRows}
         </table> 
         </div>
      </div>  
