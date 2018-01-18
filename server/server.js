@@ -246,6 +246,19 @@ app.post('/newOrder', (req, res) => {
     }
   })
 })
+app.post('/newUserOrder', (req, res) => {
+  var order = req.body;
+  order.userid = req.user;
+  console.log('ORDER IS', order);
+  db.insertOrder(order, (err, results) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(results);
+    }
+  })
+})
+
 
 app.post('/orders', (req, res) => {
   db.updateOrders(req.body.orderId, req.body.quantity, req.body.price, (err, results) => {

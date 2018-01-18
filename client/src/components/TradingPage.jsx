@@ -65,6 +65,27 @@ class TradingPage extends React.Component {
     }).catch((error) => {
       console.log(error);
     })
+    axios.get('/user').then((response) => {
+      var data = response.data.rows[0].row.split(',');
+      var btcBal = convertToNum(data[0]);
+      var ethBal = convertToNum(data[1]);
+      var xrpBal = convertToNum(data[2]);
+      var usdBal = convertToNum(data[3]);
+
+
+      instance.setState((prevState) => {
+        return {
+          usdBalance: usdBal,
+          ethBalance: ethBal,
+          xrpBalance: xrpBal,
+          btcBalance: btcBal
+        }
+      })
+
+
+    }).catch((error) => {
+      console.log('error on get', error);
+    })
 
   }
 
@@ -83,10 +104,13 @@ class TradingPage extends React.Component {
       var buysResponse = response;
         axios.get(`/sells/${currentPair}`).then((response) => {
           // console.log('BUYS ARE', response);
-          instance.setState({
-            sellOrders: response.data.rows.slice(0, 50),
-            buyOrders: buysResponse.data.rows.slice(0, 50),
-            currentCoin: name
+          instance.setState((prevState) => {
+
+            return {
+              sellOrders: response.data.rows.slice(0, 50),
+              buyOrders: buysResponse.data.rows.slice(0, 50),
+              currentCoin: name
+            }
           })
         }).catch((error) => {
           console.log(error);
@@ -94,6 +118,8 @@ class TradingPage extends React.Component {
     }).catch((error) => {
       console.log(error);
     })
+
+    
   
   }
 
@@ -109,23 +135,30 @@ class TradingPage extends React.Component {
       }
       return output.join('');
     }
-    axios.get('/user').then((response) => {
-      var data = response.data.rows[0].row.split(',');
-      var btcBal = convertToNum(data[0]);
-      var ethBal = convertToNum(data[1]);
-      var xrpBal = convertToNum(data[2]);
-      var usdBal = convertToNum(data[3]);
+ 
 
+    var currentCoin = instance.state.currentCoin;
+    // currentCoin = currentCoin.split('/')[0];
+    var currentPair = currentCoin.split('/').join('');
+    console.log('currentpair is', currentPair)
 
-      instance.setState({
-        usdBalance: usdBal,
-        ethBalance: ethBal,
-        xrpBalance: xrpBal,
-        btcBalance: btcBal
-      })
-
+    axios.get(`/buys/${currentPair}`).then((response) => {
+      var buysResponse = response;
+        axios.get(`/sells/${currentPair}`).then((response) => {
+          // console.log('BUYS ARE', response);
+          instance.setState((prevState) => {
+            console.log('SETTING STATE TO', prevState.currentCoin)
+            return {
+              sellOrders: response.data.rows.slice(0, 50),
+              buyOrders: buysResponse.data.rows.slice(0, 50),
+              currentCoin: prevState.currentCoin
+            }
+          })
+        }).catch((error) => {
+          console.log(error);
+        })
     }).catch((error) => {
-      console.log('error on get', error);
+      console.log(error);
     })
 
     axios.get('/completedOrders').then((response) => {
@@ -171,6 +204,7 @@ class TradingPage extends React.Component {
               if (newQuantity !== 0) {
                 axios.post('/newOrder', {type: firstOrder.type, executed: false, quantity: newQuantity, price: firstOrder.price, currency: firstOrder.currency, pair: firstOrder.pair, time_executed: null, userid: firstOrder.userid}).then((response) => {
                   console.log(response);
+                  instance.load();
                 }).catch((error) => {
                   console.log(error);
                 })
@@ -199,6 +233,14 @@ class TradingPage extends React.Component {
                 console.log(error);
               });
             } else  {
+              // create a BUY order
+              axios.post('/newUserOrder', {type: 'BUY', executed: false, quantity: orderVol, price: orderPrice, 
+                currency: firstOrder.currency, pair: firstOrder.pair, time_executed: null}).then((response) => {
+                  console.log(response);
+                  instance.load();
+                }).catch((error) => {
+                  console.log(error);
+                })
               console.log('dont be cheap, your price is too low');
             }
 
