@@ -11,7 +11,6 @@ class SellCard extends React.Component {
   	}
   }
 
-
   onFormEntry(volume, price) {
   	this.setState({
   	  total: volume * price
@@ -40,13 +39,13 @@ class SellCard extends React.Component {
 	  		  <div className = "field">
 	  		    <h5> Order Type: </h5>
 	      		<div className ="ui radio checkbox">
-	        		<input type="radio" name="market"/>
+	        		<input type="radio" name="marketSell" value = 'market'/>
 	        		<label>Market</label>
 	      		</div>
 	      		&nbsp;
 	      		&nbsp;
 	      	    <div className = "ui radio checkbox">
-	        	  <input type="radio" name="market"/>
+	        	  <input type="radio" name="marketSell" value = 'limit'/>
 	        	  <label>Limit</label>
 	      	    </div>
 	    	  </div>
@@ -57,14 +56,14 @@ class SellCard extends React.Component {
 	  		  </div>
 	  		  <div id = 'selectPrice' className = 'field'>
 	  		  	<h5> Price: </h5>
-	  		  	<input type = 'text' id = 'sellPrice' onChange = {() => this.onFormEntry(document.getElementById('sellVolume').value,document.getElementById('sellPrice').value )}/> 
+	  		  	<input type = 'text' id = 'sellPrice' onChange = {() => this.onFormEntry(document.getElementById('sellVolume').value, document.getElementById('sellPrice').value )}/> 
 	  		  </div>
 	  		  <div id = 'totalAmount' className = 'field'>
 	  		  	<h5> Receive Total: </h5>
 	  		  	<span id = 'totalBuyOrder'> {this.state.total} </span>
 	  		  </div>
 	  		  <div id = 'submitOrder'>
-	  		  	<button className = 'ui primary button' > Sell {coin} </button>
+	  		  	<button className = 'ui primary button' type = 'button' onClick = {() => this.props.clickFn(document.getElementById('sellVolume').value, document.getElementById('sellPrice').value,  $('input[type="radio"][name="marketSell"]:checked').val() )}> Sell {coin} </button>
 	  		  </div>
 	  		</fieldset>
   		  </form> 

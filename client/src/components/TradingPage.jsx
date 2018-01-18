@@ -47,24 +47,7 @@ class TradingPage extends React.Component {
       return output.join('');
     }
 
-    axios.get('/user').then((response) => {
-      var data = response.data.rows[0].row.split(',');
-      var btcBal = convertToNum(data[0]);
-      var ethBal = convertToNum(data[1]);
-      var xrpBal = convertToNum(data[2]);
-      var usdBal = convertToNum(data[3]);
-
-
-      instance.setState({
-        usdBalance: usdBal,
-        ethBalance: ethBal,
-        xrpBalance: xrpBal,
-        btcBalance: btcBal
-      })
-
-    }).catch((error) => {
-      console.log('error on get', error);
-    })
+    this.load()
     
     // console.log('IN BUY ORDERS CARD', this.props.currentCoin);
     var currentPair = this.state.currentCoin.split('/').join('');
@@ -114,6 +97,38 @@ class TradingPage extends React.Component {
   
   }
 
+  load() {
+    var instance = this;
+    var convertToNum = function(str) {
+      var output = []; 
+      for (var i = 0; i < str.length; i++) {
+        var char = str[i];
+        if (!isNaN(Number(char))) {
+          output.push(char);
+        }
+      }
+      return output.join('');
+    }
+    axios.get('/user').then((response) => {
+      var data = response.data.rows[0].row.split(',');
+      var btcBal = convertToNum(data[0]);
+      var ethBal = convertToNum(data[1]);
+      var xrpBal = convertToNum(data[2]);
+      var usdBal = convertToNum(data[3]);
+
+
+      instance.setState({
+        usdBalance: usdBal,
+        ethBalance: ethBal,
+        xrpBalance: xrpBal,
+        btcBalance: btcBal
+      })
+
+    }).catch((error) => {
+      console.log('error on get', error);
+    })
+  }
+
   handleBuyButtonClick(volume, price, type) {
     // console.log('HERE')
     console.log(volume, price, type, this.state.usdBalance, this.state.btcBalance);
@@ -155,6 +170,7 @@ class TradingPage extends React.Component {
             newCoinBalance = Number(newCoinBalance) + Number(updateBalance);
             axios.post('/userBalance', {newUsdBalance: newUsdBalance, newCoinBalance: newCoinBalance, coin: currentCoin}).then((response) => {
               console.log(response);
+              instance.load();
             }).catch((error) => {
               console.log(error);
             });
@@ -199,6 +215,10 @@ class TradingPage extends React.Component {
   }
 
 
+  handleSellButtonClick(volume, price, type) {
+    console.log(volume, price, type)
+  }
+
   render() {
 
     return (
@@ -213,7 +233,7 @@ class TradingPage extends React.Component {
             <div className="ui divider"></div> 
             <div className="ui two stackable cards centered">
               <BuyCard usdBalance  = {this.state.usdBalance} currentCoin = {this.state.currentCoin} clickFn = {this.handleBuyButtonClick.bind(this)}/>
-              <SellCard currentCoin = {this.state.currentCoin} btcBalance = {this.state.btcBalance} ethBalance = {this.state.ethBalance} xrpBalance = {this.state.xrpBalance}/>
+              <SellCard currentCoin = {this.state.currentCoin} btcBalance = {this.state.btcBalance} clickFn = {this.handleSellButtonClick.bind(this)} ethBalance = {this.state.ethBalance} xrpBalance = {this.state.xrpBalance}/>
             </div>  
             <div className="ui divider"></div> 
             <div className="ui two stackable cards centered">

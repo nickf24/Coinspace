@@ -19,13 +19,6 @@ class BuyCard extends React.Component {
 
   render() {
   	var coin = this.props.currentCoin.split('/')[0];
-  	// var radio = document.getElementsByName('marketBuy');
-  	// for (var i = 0; i < radio.length; i++) {
-  	//   console.log(radio[i])
-  	//   if (radio[i].checked) {
-  	//   	console.log('yo')
-  	//   }
-  	// }
    	return (
 
   		<div id="dashCard3" className="ui blue raised card"> 
