@@ -143,7 +143,7 @@ class TradingPage extends React.Component {
     // execute the order
     // if market order
     var instance = this;
-    if (type === 'market' || type === undefined) {
+    if (type === 'limit' || type === undefined) {
       // get the first order
       console.log(this.state.sellOrders);
       var makeSale = function(usdBalance, orderVol, orderPrice, sellOrders) {
@@ -154,48 +154,53 @@ class TradingPage extends React.Component {
         // else go through order and complete
         var firstOrder = sellOrders[0];
         console.log('first order is', firstOrder);
-        if (Number(firstOrder.quantity) > orderVol) {
+        if (Number(firstOrder.quantity) >= orderVol) {
           if (instance.state.usdBalance > (orderVol * orderPrice)) {
-
+            if (orderPrice >= Number(firstOrder.price)) {
             // if buyer has enough usd_balance to cover price
             // PATCH order to be executed T at the time
             // PATCH user to update usd_balance and coin balance
             // CREATE NEW order with remaining quantity
-            axios.post('/orders', {orderId: firstOrder.id, quantity: orderVol, price: orderPrice}).then((response) => {
-              console.log(response);
-            }).catch((error) => {
-              console.log(error);
-            });
+              axios.post('/orders', {orderId: firstOrder.id, quantity: orderVol, price: orderPrice}).then((response) => {
+                console.log(response);
+              }).catch((error) => {
+                console.log(error);
+              });
 
-            var newQuantity = firstOrder.quantity - orderVol;
-            axios.post('/newOrder', {type: firstOrder.type, executed: false, quantity: newQuantity, price: firstOrder.price, currency: firstOrder.currency, pair: firstOrder.pair, time_executed: null, userid: firstOrder.userid}).then((response) => {
-              console.log(response);
-            }).catch((error) => {
-              console.log(error);
-            })
+              var newQuantity = firstOrder.quantity - orderVol;
+              if (newQuantity !== 0) {
+                axios.post('/newOrder', {type: firstOrder.type, executed: false, quantity: newQuantity, price: firstOrder.price, currency: firstOrder.currency, pair: firstOrder.pair, time_executed: null, userid: firstOrder.userid}).then((response) => {
+                  console.log(response);
+                }).catch((error) => {
+                  console.log(error);
+                })
+              } 
 
-            var newUsdBalance = Number(instance.state.usdBalance) - Number(orderVol) * Number(orderPrice);
-            var newCoinBalance = Number(orderVol);
-            var currentCoin = instance.state.currentCoin;
-            currentCoin = currentCoin.split('/')[0];
-            var updateBalance;
-            if (currentCoin === 'BTC') {
-              updateBalance = instance.state.btcBalance;
+              var newUsdBalance = Number(instance.state.usdBalance) - Number(orderVol) * Number(orderPrice);
+              var newCoinBalance = Number(orderVol);
+              var currentCoin = instance.state.currentCoin;
+              currentCoin = currentCoin.split('/')[0];
+              var updateBalance;
+              if (currentCoin === 'BTC') {
+                updateBalance = instance.state.btcBalance;
+              }
+              if (currentCoin === 'ETH') {
+                updateBalance = instance.state.ethBalance;
+              } 
+              if (currentCoin === 'XRP') {
+                updateBalance = instance.state.xrpBalance;
+              }
+              
+              newCoinBalance = Number(newCoinBalance) + Number(updateBalance);
+              axios.post('/userBalance', {newUsdBalance: newUsdBalance, newCoinBalance: newCoinBalance, coin: currentCoin}).then((response) => {
+                console.log(response);
+                instance.load();
+              }).catch((error) => {
+                console.log(error);
+              });
+            } else  {
+              console.log('dont be cheap, your price is too low');
             }
-            if (currentCoin === 'ETH') {
-              updateBalance = instance.state.ethBalance;
-            } 
-            if (currentCoin === 'XRP') {
-              updateBalance = instance.state.xrpBalance;
-            }
-            
-            newCoinBalance = Number(newCoinBalance) + Number(updateBalance);
-            axios.post('/userBalance', {newUsdBalance: newUsdBalance, newCoinBalance: newCoinBalance, coin: currentCoin}).then((response) => {
-              console.log(response);
-              instance.load();
-            }).catch((error) => {
-              console.log(error);
-            });
 
           } else {
             console.log('Not enough $$$ in the bank to make this trade!')

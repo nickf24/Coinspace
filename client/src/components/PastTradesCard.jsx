@@ -1,5 +1,5 @@
 import React from 'react';
-import OrderBookRow from './OrderBookRow.jsx';
+import PastTradesRow from './PastTradesRow.jsx';
 
 
 class PastTradesCard extends React.Component {
@@ -14,7 +14,7 @@ class PastTradesCard extends React.Component {
       'overflowY': "scroll"
     }
     if (this.props.pastTrades) {
-      rows = <tbody>{this.props.pastTrades.map((trade, index) => <OrderBookRow key = {index} order = {trade} /> )}</tbody> 
+      rows = <tbody>{this.props.pastTrades.map((trade, index) => <PastTradesRow key = {index} order = {trade} /> )}</tbody> 
     }
     
 
