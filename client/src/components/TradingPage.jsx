@@ -330,7 +330,7 @@ class TradingPage extends React.Component {
       } else {
         var firstOrder = buyOrders[0];
         console.log('first buy order', firstOrder);
-        if (Number(firstOrder.quantity) > coinVol) {
+        if (Number(firstOrder.quantity) >= coinVol) {
           // we just need to sell on the first
           axios.post('/orders', {orderId: firstOrder.id, quantity: coinVol, price: firstOrder.price}).then((response) => {
             console.log(response);
@@ -340,20 +340,47 @@ class TradingPage extends React.Component {
           var newQuantity = firstOrder.quantity - coinVol;
           if (newQuantity > 0) {
           axios.post('/newOrder', {type: firstOrder.type, executed: false, quantity: newQuantity, price: firstOrder.price, currency: firstOrder.currency, pair: firstOrder.pair, time_executed: null, userid: firstOrder.userid}).then((response) => {
-                    console.log(response);
-                    instance.load();
-                  }).catch((error) => {
-                    console.log(error);
-                  })
+            console.log(response);
+            instance.load();
+          }).catch((error) => {
+            console.log(error);
+          })
           var newMoney = coinVol * Number(firstOrder.price);
           newDollars += newMoney;
         }
 
+      } else {
+        // we need to sell all of the first, and move to the next
+        console.log('move on to the next');
+        var firstOrderSell = Number(firstOrder.quantity);
+        executeSell(firstOrderSell, [firstOrderSell]);
+        var remainingOrder = coinVol - Number(firstOrder.quantity);
+        executeSell(remainingOrder, buyOrders.slice(1, buyOrders.length))
       }
     }
-    executeSell(coinVol, buyOrders);
+    // executeSell(coinVol, buyOrders);
     console.log('new dollars', newDollars)
   }
+  executeSell(coinVol, buyOrders);
+  var updateBalance;
+  var currentCoin = instance.state.currentCoin;
+  currentCoin = currentCoin.split('/')[0];
+    if (currentCoin === 'BTC') {
+      updateBalance = instance.state.btcBalance;
+    }
+    if (currentCoin === 'ETH') {
+      updateBalance = instance.state.ethBalance;
+    } 
+    if (currentCoin === 'XRP') {
+      updateBalance = instance.state.xrpBalance;
+    }
+  var newCoinBalance = Number(updateBalance) - coinVol;
+  axios.post('/userBalance', {newUsdBalance: Number(instance.state.usdBalance) + Number(newDollars), newCoinBalance: newCoinBalance, coin: currentCoin}).then((response) => {
+   console.log('user bal response', response);
+    instance.load();
+  }).catch((error) => {
+      console.log(error);
+  });
 }
 
   render() {
