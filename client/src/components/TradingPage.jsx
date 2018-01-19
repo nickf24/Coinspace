@@ -145,11 +145,7 @@ class TradingPage extends React.Component {
   }
 
   handleBuyButtonClick(volume, price, type) {
-    // console.log('HERE')
-    // console.log(volume, price, type, this.state.usdBalance, this.state.btcBalance);
-
-    // execute the order
-    // if market order
+    
     var instance = this;
     if (type === 'limit' || type === undefined) {
       // get the first order
@@ -162,7 +158,7 @@ class TradingPage extends React.Component {
         // else go through order and complete
         var firstOrder = sellOrders[0];
         console.log('first order is', firstOrder);
-        if (Number(firstOrder.quantity) >= orderVol) {
+        // if (Number(firstOrder.quantity) >= orderVol) {
           if (usdBalance > (orderVol * orderPrice)) {
             if (orderPrice >= Number(firstOrder.price)) {
             // if buyer has enough usd_balance to cover price
@@ -176,38 +172,46 @@ class TradingPage extends React.Component {
               });
 
               var newQuantity = firstOrder.quantity - orderVol;
-              if (newQuantity !== 0) {
-                axios.post('/newOrder', {type: firstOrder.type, executed: false, quantity: newQuantity, price: firstOrder.price, currency: firstOrder.currency, pair: firstOrder.pair, time_executed: null, userid: firstOrder.userid}).then((response) => {
-                  console.log(response);
+              if (newQuantity > 0) {
+                  axios.post('/newOrder', {type: firstOrder.type, executed: false, quantity: newQuantity, price: firstOrder.price, currency: firstOrder.currency, pair: firstOrder.pair, time_executed: null, userid: firstOrder.userid}).then((response) => {
+                    console.log(response);
+                    instance.load();
+                  }).catch((error) => {
+                    console.log(error);
+                  })
+                
+                // console.log('old balances are', usdBalance);
+                var newUsdBalance = Number(usdBalance) - (Number(orderVol) * Number(orderPrice));
+                // console.log('new balances are!!', newUsdBalance, orderVol, orderPrice)
+                var newCoinBalance = Number(orderVol);
+                var currentCoin = instance.state.currentCoin;
+                currentCoin = currentCoin.split('/')[0];
+                var updateBalance;
+                if (currentCoin === 'BTC') {
+                  updateBalance = instance.state.btcBalance;
+                }
+                if (currentCoin === 'ETH') {
+                  updateBalance = instance.state.ethBalance;
+                } 
+                if (currentCoin === 'XRP') {
+                  updateBalance = instance.state.xrpBalance;
+                }
+                // console.log(newCoinBalance, updateBalance)
+                newCoinBalance = Number(newCoinBalance) + Number(updateBalance);
+                axios.post('/userBalance', {newUsdBalance: newUsdBalance, newCoinBalance: newCoinBalance, coin: currentCoin}).then((response) => {
+                  // console.log(response);
                   instance.load();
                 }).catch((error) => {
                   console.log(error);
-                })
-              } 
-              // console.log('old balances are', usdBalance);
-              var newUsdBalance = Number(usdBalance) - (Number(orderVol) * Number(orderPrice));
-              // console.log('new balances are!!', newUsdBalance, orderVol, orderPrice)
-              var newCoinBalance = Number(orderVol);
-              var currentCoin = instance.state.currentCoin;
-              currentCoin = currentCoin.split('/')[0];
-              var updateBalance;
-              if (currentCoin === 'BTC') {
-                updateBalance = instance.state.btcBalance;
+                });
+              } else {
+                var extraVol = Math.abs(newQuantity);
+                var firstVol = firstOrder.quantity;
+                // makeSale(usdBalance, firstVol, orderPrice, [firstOrder]);
+                // usdBalance = usdBalance - firstVol * orderPrice;
+                // makeSale(usdBalance, extraVol, orderPrice, sellOrders[1])
+                console.log('bigger by', Math.abs(newQuantity));
               }
-              if (currentCoin === 'ETH') {
-                updateBalance = instance.state.ethBalance;
-              } 
-              if (currentCoin === 'XRP') {
-                updateBalance = instance.state.xrpBalance;
-              }
-              // console.log(newCoinBalance, updateBalance)
-              newCoinBalance = Number(newCoinBalance) + Number(updateBalance);
-              axios.post('/userBalance', {newUsdBalance: newUsdBalance, newCoinBalance: newCoinBalance, coin: currentCoin}).then((response) => {
-                // console.log(response);
-                instance.load();
-              }).catch((error) => {
-                console.log(error);
-              });
             } else  {
               // create a BUY order
               axios.post('/newUserOrder', {type: 'BUY', executed: false, quantity: orderVol, price: orderPrice, 
@@ -223,14 +227,15 @@ class TradingPage extends React.Component {
           } else {
             console.log('Not enough $$$ in the bank to make this trade!')
           }
-        } else {
+        // } else {
           // first order does not have enough vol to cover
           // go through and buy up all of first over
           // make sales with rest of sell orders/remaining balance
           // makeSale(usdBalance) 
-
-          console.log('first order does not enough vol to cover')
-        }
+          // var currentBal = usdBalance;
+          // call makesale with usdBalance, price, sellOrder1
+          // console.log('first order does not enough vol to cover')
+        // }
       }
       makeSale(Number(instance.state.usdBalance), Number(volume), Number(price), instance.state.sellOrders);
       // if first order volume > purchase volume 
@@ -239,26 +244,72 @@ class TradingPage extends React.Component {
       // else if purchase volume > first order volume
         // var sum = 0;
         // var usd_balance = current user's usd_balance
-        
-
-    } else {
-      // if limit order
-      // if limit order price < highest current bid
-        // buy as much up of the coin as possible
-        // if it doesnt run out
-          // finish
-        // else 
-          // order will sit there for the remainign unpurchased Quantity
-      // if limit order > highest current bid
-        // POST new ORDER to DB 
+      
     } 
-     
-           
     
 
     // reduce the user's USD balance by volume
     // increase the user's coin balance by coin volume bought
 
+  }
+
+  handleMarketBuyClick(usdVal) {
+    var instance = this;
+    var sellOrders = instance.state.sellOrders;
+    var executeBuy = function(usdVal, sellOrders) {  
+      if (usdVal === 0) {
+        console.log('out of money/order complete');
+        return;
+      } else { 
+        var firstOrder = sellOrders[0];
+        console.log(firstOrder);
+        if (Number(firstOrder.quantity) * Number(firstOrder.price) > usdVal) {
+          // only need 1 order
+          // execute buy on the first order
+          var orderVol = (usdVal / Number(firstOrder.price));
+          axios.post('/orders', {orderId: firstOrder.id, quantity: orderVol, price: firstOrder.price}).then((response) => {
+            console.log(response);
+          }).catch((error) => {
+            console.log(error);
+          });
+          var newQuantity = firstOrder.quantity - orderVol;
+          axios.post('/newOrder', {type: firstOrder.type, executed: false, quantity: newQuantity, price: firstOrder.price, currency: firstOrder.currency, pair: firstOrder.pair, time_executed: null, userid: firstOrder.userid}).then((response) => {
+                    console.log(response);
+                    instance.load();
+                  }).catch((error) => {
+                    console.log(error);
+                  })
+          var currentCoin = instance.state.currentCoin;
+          currentCoin = currentCoin.split('/')[0];
+          var updateBalance;
+          if (currentCoin === 'BTC') {
+            updateBalance = instance.state.btcBalance;
+          }
+          if (currentCoin === 'ETH') {
+            updateBalance = instance.state.ethBalance;
+          } 
+          if (currentCoin === 'XRP') {
+            updateBalance = instance.state.xrpBalance;
+          }
+          // console.log(newCoinBalance, updateBalance)
+          var newCoinBalance = Number(orderVol);
+
+          newCoinBalance = Number(newCoinBalance) + Number(updateBalance);
+          axios.post('/userBalance', {newUsdBalance: Number(instance.state.usdBalance) - usdVal, newCoinBalance: newCoinBalance, coin: currentCoin}).then((response) => {
+            // console.log(response);
+            instance.load();
+          }).catch((error) => {
+            console.log(error);
+          });
+        } else {
+          console.log('not enough to fill')
+          // first order doesn't have enough to fill
+          // execute on first order
+          // recurse with reduced usdVal, sellOrders = sellOrders.slice(0, sellOrders.length)
+        }
+      }
+    }
+    executeBuy(usdVal, sellOrders);
   }
 
 
@@ -279,7 +330,7 @@ class TradingPage extends React.Component {
 
             <div className="ui divider"></div> 
             <div className="ui two stackable cards centered">
-              <BuyCard usdBalance  = {this.state.usdBalance} currentCoin = {this.state.currentCoin} clickFn = {this.handleBuyButtonClick.bind(this)}/>
+              <BuyCard usdBalance  = {this.state.usdBalance} currentCoin = {this.state.currentCoin} clickFn = {this.handleBuyButtonClick.bind(this)} clickFn2 = {this.handleMarketBuyClick.bind(this)}/>
               <SellCard currentCoin = {this.state.currentCoin} btcBalance = {this.state.btcBalance} clickFn = {this.handleSellButtonClick.bind(this)} ethBalance = {this.state.ethBalance} xrpBalance = {this.state.xrpBalance}/>
             </div>  
             <div className="ui divider"></div> 
