@@ -335,7 +335,6 @@ class TradingPage extends React.Component {
               coinsLost -= orderVol;
               instance.handleMarketSell(orderVol);
            } else {
-             console.log('in here')
             // sell a
             // var newQuantity = orderVol - firstOrder.quantity;
             // var extraVol = Math.abs(newQuantity);

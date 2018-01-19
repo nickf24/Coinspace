@@ -84,6 +84,14 @@ app.get('/auth/facebook/callback',
     res.redirect('/');
   });
 
+app.get('/authenticate', (req, res) => {
+  if (req.isAuthenticated()) {
+    res.status(200).json({loggedin: true});
+  } else {
+    res.status(200).json({loggedin: false});
+  }
+})
+
 //rest of the app
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
