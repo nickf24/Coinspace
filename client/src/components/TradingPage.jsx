@@ -207,9 +207,6 @@ class TradingPage extends React.Component {
               } else {
                 var extraVol = Math.abs(newQuantity);
                 var firstVol = firstOrder.quantity;
-                // makeSale(usdBalance, firstVol, orderPrice, [firstOrder]);
-                // usdBalance = usdBalance - firstVol * orderPrice;
-                // makeSale(usdBalance, extraVol, orderPrice, sellOrders[1])
                 console.log('bigger by', Math.abs(newQuantity));
               }
             } else  {
@@ -227,35 +224,16 @@ class TradingPage extends React.Component {
           } else {
             console.log('Not enough $$$ in the bank to make this trade!')
           }
-        // } else {
-          // first order does not have enough vol to cover
-          // go through and buy up all of first over
-          // make sales with rest of sell orders/remaining balance
-          // makeSale(usdBalance) 
-          // var currentBal = usdBalance;
-          // call makesale with usdBalance, price, sellOrder1
-          // console.log('first order does not enough vol to cover')
-        // }
       }
       makeSale(Number(instance.state.usdBalance), Number(volume), Number(price), instance.state.sellOrders);
-      // if first order volume > purchase volume 
-        // else 
-          // send message 'cannot buy this many coins'
-      // else if purchase volume > first order volume
-        // var sum = 0;
-        // var usd_balance = current user's usd_balance
-      
     } 
-    
-
-    // reduce the user's USD balance by volume
-    // increase the user's coin balance by coin volume bought
 
   }
 
   handleMarketBuyClick(usdVal) {
     var instance = this;
     var sellOrders = instance.state.sellOrders;
+    var newCoins = 0;
     var executeBuy = function(usdVal, sellOrders) {  
       if (usdVal === 0) {
         console.log('out of money/order complete');
@@ -263,7 +241,7 @@ class TradingPage extends React.Component {
       } else { 
         var firstOrder = sellOrders[0];
         console.log(firstOrder);
-        if (Number(firstOrder.quantity) * Number(firstOrder.price) > usdVal) {
+        if (Number(firstOrder.quantity) * Number(firstOrder.price) >= usdVal) {
           // only need 1 order
           // execute buy on the first order
           var orderVol = (usdVal / Number(firstOrder.price));
@@ -273,36 +251,26 @@ class TradingPage extends React.Component {
             console.log(error);
           });
           var newQuantity = firstOrder.quantity - orderVol;
+          if (newQuantity > 0) {
           axios.post('/newOrder', {type: firstOrder.type, executed: false, quantity: newQuantity, price: firstOrder.price, currency: firstOrder.currency, pair: firstOrder.pair, time_executed: null, userid: firstOrder.userid}).then((response) => {
                     console.log(response);
                     instance.load();
                   }).catch((error) => {
                     console.log(error);
                   })
-          var currentCoin = instance.state.currentCoin;
-          currentCoin = currentCoin.split('/')[0];
-          var updateBalance;
-          if (currentCoin === 'BTC') {
-            updateBalance = instance.state.btcBalance;
           }
-          if (currentCoin === 'ETH') {
-            updateBalance = instance.state.ethBalance;
-          } 
-          if (currentCoin === 'XRP') {
-            updateBalance = instance.state.xrpBalance;
-          }
+          
           // console.log(newCoinBalance, updateBalance)
           var newCoinBalance = Number(orderVol);
-
-          newCoinBalance = Number(newCoinBalance) + Number(updateBalance);
-          axios.post('/userBalance', {newUsdBalance: Number(instance.state.usdBalance) - usdVal, newCoinBalance: newCoinBalance, coin: currentCoin}).then((response) => {
-            // console.log(response);
-            instance.load();
-          }).catch((error) => {
-            console.log(error);
-          });
+          newCoins += newCoinBalance;
+          
         } else {
-          console.log('not enough to fill')
+          console.log('not enough to fill', usdVal - Number(firstOrder.quantity) * Number(firstOrder.price));
+          var firstOrderBuy = Number(firstOrder.quantity) * Number(firstOrder.price);
+          executeBuy(firstOrderBuy, [firstOrder]);
+          var remainingOrder = usdVal - (Number(firstOrder.quantity) * Number(firstOrder.price));
+          executeBuy(remainingOrder, sellOrders.slice(1, sellOrders.length));
+
           // first order doesn't have enough to fill
           // execute on first order
           // recurse with reduced usdVal, sellOrders = sellOrders.slice(0, sellOrders.length)
@@ -310,6 +278,26 @@ class TradingPage extends React.Component {
       }
     }
     executeBuy(usdVal, sellOrders);
+    var updateBalance;
+    var currentCoin = instance.state.currentCoin;
+    currentCoin = currentCoin.split('/')[0];
+    var updateBalance;
+    if (currentCoin === 'BTC') {
+      updateBalance = instance.state.btcBalance;
+    }
+    if (currentCoin === 'ETH') {
+      updateBalance = instance.state.ethBalance;
+    } 
+    if (currentCoin === 'XRP') {
+      updateBalance = instance.state.xrpBalance;
+    }
+    var newCoinBalance = Number(updateBalance) + newCoins;
+    axios.post('/userBalance', {newUsdBalance: instance.state.usdBalance - usdVal, newCoinBalance: newCoinBalance, coin: currentCoin}).then((response) => {
+       // console.log(response);
+          instance.load();
+        }).catch((error) => {
+            console.log(error);
+        });
   }
 
 
