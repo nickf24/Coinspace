@@ -25,7 +25,7 @@ class BuyCard extends React.Component {
   }
 
   render() {
-
+  	//
   	var coin = this.props.currentCoin.split('/')[0];
   	var submission = null;
   	if (this.state.checked === 'market') {
