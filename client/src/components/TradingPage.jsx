@@ -207,7 +207,20 @@ class TradingPage extends React.Component {
               } else {
                 var extraVol = Math.abs(newQuantity);
                 var firstVol = firstOrder.quantity;
-                console.log('bigger by', Math.abs(newQuantity));
+                console.log('bigger by', Math.abs(newQuantity) * Number(firstOrder.price));
+
+                // buy up whatever exists at that price
+                // create a new order at that price
+                instance.handleMarketBuyClick(firstOrder.price * firstOrder.quantity);
+
+                axios.post('/newUserOrder', {type: 'BUY', executed: false, quantity: extraVol, price: orderPrice, 
+                currency: firstOrder.currency, pair: firstOrder.pair, time_executed: null}).then((response) => {
+                  // console.log(response);
+                  instance.load();
+                }).catch((error) => {
+                  console.log(error);
+                })
+
               }
             } else  {
               // create a BUY order
@@ -301,9 +314,47 @@ class TradingPage extends React.Component {
   }
 
 
-  handleSellButtonClick(volume, price, type) {
-    console.log(volume, price, type)
+  handleSellButtonClick(volume, price) {
+    console.log(volume, price)
   }
+
+  handleMarketSell(coinVol) {
+    console.log('in sell', coinVol);
+    var instance = this;
+    var newDollars = 0;
+    var buyOrders = instance.state.buyOrders;
+    var executeSell = function(coinVol, buyOrders) {
+      if (coinVol === 0) {
+        console.log('all done');
+        return;
+      } else {
+        var firstOrder = buyOrders[0];
+        console.log('first buy order', firstOrder);
+        if (Number(firstOrder.quantity) > coinVol) {
+          // we just need to sell on the first
+          axios.post('/orders', {orderId: firstOrder.id, quantity: coinVol, price: firstOrder.price}).then((response) => {
+            console.log(response);
+          }).catch((error) => {
+            console.log(error);
+          });
+          var newQuantity = firstOrder.quantity - coinVol;
+          if (newQuantity > 0) {
+          axios.post('/newOrder', {type: firstOrder.type, executed: false, quantity: newQuantity, price: firstOrder.price, currency: firstOrder.currency, pair: firstOrder.pair, time_executed: null, userid: firstOrder.userid}).then((response) => {
+                    console.log(response);
+                    instance.load();
+                  }).catch((error) => {
+                    console.log(error);
+                  })
+          var newMoney = coinVol * Number(firstOrder.price);
+          newDollars += newMoney;
+        }
+
+      }
+    }
+    executeSell(coinVol, buyOrders);
+    console.log('new dollars', newDollars)
+  }
+}
 
   render() {
 
@@ -319,7 +370,7 @@ class TradingPage extends React.Component {
             <div className="ui divider"></div> 
             <div className="ui two stackable cards centered">
               <BuyCard usdBalance  = {this.state.usdBalance} currentCoin = {this.state.currentCoin} clickFn = {this.handleBuyButtonClick.bind(this)} clickFn2 = {this.handleMarketBuyClick.bind(this)}/>
-              <SellCard currentCoin = {this.state.currentCoin} btcBalance = {this.state.btcBalance} clickFn = {this.handleSellButtonClick.bind(this)} ethBalance = {this.state.ethBalance} xrpBalance = {this.state.xrpBalance}/>
+              <SellCard currentCoin = {this.state.currentCoin} btcBalance = {this.state.btcBalance} clickFn = {this.handleSellButtonClick.bind(this)} clickFn2 = {this.handleMarketSell.bind(this)} ethBalance = {this.state.ethBalance} xrpBalance = {this.state.xrpBalance}/>
             </div>  
             <div className="ui divider"></div> 
             <div className="ui two stackable cards centered">
