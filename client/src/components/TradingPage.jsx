@@ -315,7 +315,98 @@ class TradingPage extends React.Component {
 
 
   handleSellButtonClick(volume, price) {
-    console.log(volume, price)
+
+    var instance = this;
+    var dollarsAdded = 0;
+    var coinsLost = 0;
+      // get the first order
+      var makeSale = function(orderVol, orderPrice, buyOrders) {
+        if (orderVol <= 0) {
+          return 'finished';
+        } 
+        // else go through order and complete
+        var firstOrder = buyOrders[0];
+        console.log('first order is', firstOrder);
+        // if (Number(firstOrder.quantity) >= orderVol) {
+        if (firstOrder.quantity >= orderVol) {
+          console.log('yoyoyo')
+          if (orderPrice <= Number(firstOrder.price)) {
+              dollarsAdded += orderPrice * orderVol;
+              coinsLost -= orderVol;
+              instance.handleMarketSell(orderVol);
+           } else {
+             console.log('in here')
+            // sell a
+            // var newQuantity = orderVol - firstOrder.quantity;
+            // var extraVol = Math.abs(newQuantity);
+            // var firstVol = firstOrder.quantity;
+            axios.post('/newUserOrder', {type: 'SELL', executed: false, quantity: orderVol, price: orderPrice, 
+            currency: firstOrder.currency, pair: firstOrder.pair, time_executed: null}).then((response) => {
+              // console.log(response);
+              instance.load();
+            }).catch((error) => {
+              console.log(error);
+            })
+
+          }
+        } else {
+          // sell all at the current buying price
+          if (orderPrice > firstOrder.price) {
+            axios.post('/newUserOrder', {type: 'SELL', executed: false, quantity: orderVol, price: orderPrice, 
+            currency: firstOrder.currency, pair: firstOrder.pair, time_executed: null}).then((response) => {
+              // console.log(response);
+              instance.load();
+            }).catch((error) => {
+              console.log(error);
+            })
+            console.log('here, higher price than biggest buy')
+          } else {
+          // create a BUY order
+            // sell all at the relevant price
+            // create a buy order
+            dollarsAdded += Number(firstOrder.quantity) * Number(firstOrder.price);
+            coinsLost = coinsLost - Number(firstOrder.quantity);
+            axios.post('/orders', {orderId: firstOrder.id, quantity: firstOrder.quantity, price: firstOrder.price}).then((response) => {
+              console.log(response);
+            }).catch((error) => {
+              console.log(error);
+            });
+
+            var newVol = Math.abs(firstOrder.quantity - orderVol);
+            axios.post('/newUserOrder', {type: 'SELL', executed: false, quantity: newVol, price: firstOrder.price, 
+            currency: firstOrder.currency, pair: firstOrder.pair, time_executed: null}).then((response) => {
+              // console.log(response);
+              instance.load();
+            }).catch((error) => {
+              console.log(error);
+            })
+            console.log('now at the end');
+          }
+        }
+
+      } 
+      makeSale(Number(volume), Number(price), instance.state.buyOrders);
+      var updateBalance;
+      var currentCoin = instance.state.currentCoin;
+      currentCoin = currentCoin.split('/')[0];
+        if (currentCoin === 'BTC') {
+          updateBalance = instance.state.btcBalance;
+        }
+        if (currentCoin === 'ETH') {
+          updateBalance = instance.state.ethBalance;
+        } 
+        if (currentCoin === 'XRP') {
+          updateBalance = instance.state.xrpBalance;
+        }
+        console.log('coinslost is', coinsLost)
+      var newCoinBalance = Number(updateBalance) + coinsLost;
+      axios.post('/userBalance', {newUsdBalance: Number(instance.state.usdBalance) + Number(dollarsAdded), newCoinBalance: newCoinBalance, coin: currentCoin}).then((response) => {
+       console.log('user bal response', response);
+        instance.load();
+      }).catch((error) => {
+          console.log(error);
+      });
+        
   }
 
   handleMarketSell(coinVol) {
@@ -350,16 +441,12 @@ class TradingPage extends React.Component {
         }
 
       } else {
-        // we need to sell all of the first, and move to the next
-        console.log('move on to the next');
         var firstOrderSell = Number(firstOrder.quantity);
-        executeSell(firstOrderSell, [firstOrderSell]);
+        executeSell(firstOrderSell, [firstOrder]);
         var remainingOrder = coinVol - Number(firstOrder.quantity);
         executeSell(remainingOrder, buyOrders.slice(1, buyOrders.length))
       }
     }
-    // executeSell(coinVol, buyOrders);
-    console.log('new dollars', newDollars)
   }
   executeSell(coinVol, buyOrders);
   var updateBalance;
