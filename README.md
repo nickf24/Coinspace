@@ -2,13 +2,6 @@
 
 Coin Rebase (aka coinspace)
 
-## Team
-
-  - Dillon Lin
-  - Jackie Jou
-  - Nuno Neves
-  - Derrick Cross
-
 ## Table of Contents
 
 1. [Usage](#Usage)
